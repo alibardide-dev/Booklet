@@ -24,9 +24,7 @@ class HomeViewModel @Inject constructor(
     val books = _books.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            _books.update { bookDao.getAllBooks() }
-        }
+        getAllBooks()
     }
 
     fun onAction(action: HomeUiActions) {
@@ -38,22 +36,31 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { it.copy(dialogType = Insert) }
 
             is HomeUiActions.UpdateBookDialog ->
-                _uiState.update { it.copy(dialogType = Update(action.book)) }
+                _uiState.update { it.copy(dialogType = Update(action.id)) }
 
             is HomeUiActions.InsertBook ->
                 viewModelScope.launch {
                     bookDao.insertBook(action.book)
-                    _books.update { bookDao.getAllBooks() }
+                    getAllBooks()
                 }
 
             is HomeUiActions.UpdateBook ->
                 viewModelScope.launch {
                     bookDao.updateBook(action.book)
-                    _books.update { bookDao.getAllBooks() }
+                    getAllBooks()
                 }
 
             is HomeUiActions.ApplyFilter ->
                 _uiState.update { it.copy(selectedFilter = action.filter) }
+        }
+    }
+
+    private fun getAllBooks() {
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            _books.update { bookDao.getAllBooks() }
+        }.invokeOnCompletion {
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 

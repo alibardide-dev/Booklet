@@ -1,9 +1,9 @@
 package com.phoenix.booklet.screen.home
 
-import com.phoenix.booklet.data.model.Book
-import com.phoenix.booklet.data.model.ReadingStatus
+import java.util.UUID
 
 data class HomeUiState(
+    val isLoading: Boolean = false,
     val dialogType: HomeDialog = HomeDialog.None,
     val selectedFilter: FilterStatus = FilterStatus.ALL,
 )
@@ -15,5 +15,6 @@ enum class FilterStatus {
 sealed interface HomeDialog {
     data object None: HomeDialog
     data object Insert: HomeDialog
-    data class Update(val book: Book): HomeDialog
+    data class Update(val id: UUID): HomeDialog
+    data class Details(val id: UUID): HomeDialog
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,6 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
 import com.phoenix.booklet.R
 import com.phoenix.booklet.data.model.Book
@@ -39,7 +42,7 @@ fun BookWidget(
     modifier: Modifier = Modifier,
     book: Book
 ) {
-    Row(
+    ConstraintLayout(
         modifier = modifier
             .border(
                 width = 2.dp,
@@ -48,8 +51,33 @@ fun BookWidget(
             )
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
+        val (marker, picture, details) = createRefs()
+        Box(
+            Modifier
+                .constrainAs(marker) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    height = Dimension.fillToConstraints
+                }
+                .width(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(
+                    when(book.status) {
+                        ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.tertiaryContainer
+                        ReadingStatus.READING -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
+                        ReadingStatus.FINISHED -> MaterialTheme.colorScheme.primaryContainer
+                        ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
+                    }
+                )
+        )
         Box(
             modifier = Modifier
+                .constrainAs(picture) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(marker.end, margin = 8.dp)
+                }
                 .fillMaxWidth(.25f)
                 .aspectRatio(2 / 3f)
                 .clip(RoundedCornerShape(8.dp))
@@ -73,11 +101,12 @@ fun BookWidget(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
         }
-        Spacer(Modifier.width(16.dp))
         Column(
             Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
+                .constrainAs(details) {
+                    top.linkTo(parent.top)
+                    start.linkTo(picture.end, margin = 16.dp)
+                }
         ) {
             Text(
                 text = book.name,
@@ -86,44 +115,15 @@ fun BookWidget(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = book.author,
-                fontSize = 18.sp
+                text = "by ${book.author}",
+                fontSize = 16.sp
             )
             Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "Released ${book.releaseYear}",
-                    fontSize = 15.sp
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = book.status.name,
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(
-                            when(book.status) {
-                                ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.tertiaryContainer
-                                ReadingStatus.READING -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
-                                ReadingStatus.FINISHED -> MaterialTheme.colorScheme.primaryContainer
-                                ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
-                            }
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = when(book.status) {
-                        ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.onTertiaryContainer
-                        ReadingStatus.READING -> MaterialTheme.colorScheme.onSurface
-                        ReadingStatus.FINISHED -> MaterialTheme.colorScheme.onPrimaryContainer
-                        ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+            Text(
+                text = "${book.publishYear} • ${book.publisher}",
+                fontSize = 14.sp
+            )
 
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
     }
 }

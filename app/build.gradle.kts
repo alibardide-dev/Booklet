@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.splash)
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.material.icons)

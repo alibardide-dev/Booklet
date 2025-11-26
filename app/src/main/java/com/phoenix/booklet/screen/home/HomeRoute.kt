@@ -39,6 +39,7 @@ fun HomeRoute(
     }
 
     HomeScreen(
+        isLoading = uiState.isLoading,
         books = books.reversed(),
         onClickAdd = { openInsertDialog() },
         selectedFilter = uiState.selectedFilter,
@@ -72,5 +73,6 @@ fun HomeRoute(
             }
 
         is HomeDialog.Update -> TODO()
+        is HomeDialog.Details -> TODO()
     }
 }
