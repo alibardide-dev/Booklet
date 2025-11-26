@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.splash)
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.material.icons)
+    implementation(libs.gson)
     implementation(libs.kotlinx.serializable)
     // Hilt
     implementation(libs.hilt.android)

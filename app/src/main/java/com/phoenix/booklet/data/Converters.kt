@@ -23,6 +23,7 @@ class StatusConverter {
     @TypeConverter
     fun stringToReadingStatus(name: String): ReadingStatus =
         ReadingStatus.valueOf(name)
+
 }
 
 object UUIDConverter {

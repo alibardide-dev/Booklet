@@ -3,15 +3,13 @@ package com.phoenix.booklet.screen.home.component
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -32,12 +30,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +63,7 @@ import com.phoenix.booklet.data.model.ReadingStatus
 import com.phoenix.booklet.utils.deleteFileFromPath
 import com.phoenix.booklet.utils.getUriFromPath
 import com.phoenix.booklet.utils.saveUriAsPhoto
+import com.phoenix.booklet.utils.toHumanReadableDate
 import java.util.Date
 import java.util.UUID
 
@@ -77,6 +80,9 @@ fun InsertBookBottomSheet(
     var isTranslated by remember { mutableStateOf(book?.translator != null) }
     var translator by remember { mutableStateOf(book?.translator ?: "") }
     var status by remember { mutableStateOf(book?.status ?: ReadingStatus.WISHLIST) }
+    var date by remember { mutableStateOf(book?.dateFinished ?: Date(System.currentTimeMillis())) }
+    val datePickerState = rememberDatePickerState(System.currentTimeMillis())
+    var isPickingDate by remember { mutableStateOf(false) }
     var publisher by remember { mutableStateOf(book?.publisher ?: "") }
     var releaseYear by remember { mutableStateOf(book?.releaseYear ?: "") }
     var publishYear by remember { mutableStateOf(book?.publishYear ?: "") }
@@ -89,7 +95,9 @@ fun InsertBookBottomSheet(
                 photoUri = it.data?.data
             }
         }
-
+    /*
+    BOOK INFO
+     */
     Column(
         modifier
             .verticalScroll(rememberScrollState())
@@ -128,7 +136,10 @@ fun InsertBookBottomSheet(
                         val intent = Intent(Intent.ACTION_GET_CONTENT)
                             .apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
-                                setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
+                                setDataAndType(
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    "image/*"
+                                )
                             }
                         launcher.launch(intent)
                     },
@@ -174,6 +185,9 @@ fun InsertBookBottomSheet(
             }
         }
         Spacer(Modifier.height(8.dp))
+        /*
+        IS TRANSLATED
+         */
         Row(Modifier.align(Alignment.CenterHorizontally)) {
             FilterChip(
                 selected = !isTranslated,
@@ -199,6 +213,9 @@ fun InsertBookBottomSheet(
             )
         }
         Spacer(Modifier.height(16.dp))
+        /*
+        READING STATUS
+         */
         Text(
             text = "Status",
             fontSize = 24.sp,
@@ -232,7 +249,35 @@ fun InsertBookBottomSheet(
                 label = { Text("Archived") }
             )
         }
+        Spacer(Modifier.height(8.dp))
+        AnimatedVisibility(
+            status == ReadingStatus.FINISHED || status == ReadingStatus.ARCHIVED
+        ) {
+            Row(
+                Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .clickable { isPickingDate = true }
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text =
+                        when (status) {
+                            ReadingStatus.FINISHED -> "Finished at ${date.toHumanReadableDate()}"
+                            ReadingStatus.ARCHIVED -> "Archived at ${date.toHumanReadableDate()}"
+                            else -> ""
+                        }
+                )
+            }
+        }
         Spacer(Modifier.height(16.dp))
+        /*
+        PUBLISHING INFO
+         */
         Text(
             text = "Publishing info",
             fontSize = 24.sp,
@@ -273,7 +318,6 @@ fun InsertBookBottomSheet(
                 val uuid = book?.id ?: UUID.randomUUID()
                 val pathUri = getUriFromPath(book?.cover)
                 var filePath: String? = book?.cover // Or null
-                // TODO: SAVE ONLY if changed / added
                 if (pathUri != null && pathUri != photoUri) {
                     deleteFileFromPath(book?.cover)
                     filePath = null
@@ -299,6 +343,11 @@ fun InsertBookBottomSheet(
                     publishYear = publishYear,
                     cover = filePath,
                     status = status,
+                    dateFinished = if (
+                        status == ReadingStatus.FINISHED || status == ReadingStatus.ARCHIVED
+                    )
+                        date
+                    else null,
                     dateCreated = book?.dateCreated ?: Date(System.currentTimeMillis()),
                     dateUpdated = Date(System.currentTimeMillis())
                 )
@@ -315,6 +364,29 @@ fun InsertBookBottomSheet(
                 } else {
                     Text("Save Book")
                 }
+            }
+        }
+
+        if (isPickingDate) {
+            DatePickerDialog(
+                onDismissRequest = { isPickingDate = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            date = Date(datePickerState.selectedDateMillis!!)
+                            isPickingDate = false
+                        },
+                    ) {
+                        Text("Ok")
+                    }
+                }
+            ) {
+                DatePicker(
+                    state = datePickerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                )
             }
         }
     }

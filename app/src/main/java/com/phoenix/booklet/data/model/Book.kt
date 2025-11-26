@@ -20,6 +20,7 @@ data class Book(
     val publishYear: String?,
     val cover: String?,
     val status: ReadingStatus,
+    val dateFinished: Date?,
     @ColumnInfo("created_at")
     val dateCreated: Date,
     @ColumnInfo("updated_at")
