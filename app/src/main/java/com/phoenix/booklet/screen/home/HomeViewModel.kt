@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.phoenix.booklet.data.dao.BookDao
 import com.phoenix.booklet.data.model.Book
-import com.phoenix.booklet.screen.home.HomeDialog.*
+import com.phoenix.booklet.screen.home.HomeDialog.Details
+import com.phoenix.booklet.screen.home.HomeDialog.Insert
+import com.phoenix.booklet.screen.home.HomeDialog.None
+import com.phoenix.booklet.screen.home.HomeDialog.Update
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +41,9 @@ class HomeViewModel @Inject constructor(
             is HomeUiActions.UpdateBookDialog ->
                 _uiState.update { it.copy(dialogType = Update(action.id)) }
 
+            is HomeUiActions.DetailsDialog ->
+                _uiState.update { it.copy(dialogType = Details(action.id)) }
+
             is HomeUiActions.InsertBook ->
                 viewModelScope.launch {
                     bookDao.insertBook(action.book)
@@ -52,6 +58,7 @@ class HomeViewModel @Inject constructor(
 
             is HomeUiActions.ApplyFilter ->
                 _uiState.update { it.copy(selectedFilter = action.filter) }
+
         }
     }
 

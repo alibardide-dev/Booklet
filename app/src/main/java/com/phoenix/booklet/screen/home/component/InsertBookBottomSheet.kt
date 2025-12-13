@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,6 +80,7 @@ fun InsertBookBottomSheet(
     var author by remember { mutableStateOf(book?.author ?: "") }
     var isTranslated by remember { mutableStateOf(book?.translator != null) }
     var translator by remember { mutableStateOf(book?.translator ?: "") }
+    var description by remember { mutableStateOf(book?.description ?: "") }
     var status by remember { mutableStateOf(book?.status ?: ReadingStatus.WISHLIST) }
     var date by remember { mutableStateOf(book?.dateFinished ?: Date(System.currentTimeMillis())) }
     val datePickerState = rememberDatePickerState(System.currentTimeMillis())
@@ -213,6 +215,16 @@ fun InsertBookBottomSheet(
             )
         }
         Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            placeholder = { Text("Description") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeight(120.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        Spacer(Modifier.height(16.dp))
         /*
         READING STATUS
          */
@@ -338,6 +350,7 @@ fun InsertBookBottomSheet(
                     name = name,
                     author = author,
                     translator = if (isTranslated) translator else null,
+                    description = description,
                     publisher = publisher,
                     releaseYear = releaseYear,
                     publishYear = publishYear,

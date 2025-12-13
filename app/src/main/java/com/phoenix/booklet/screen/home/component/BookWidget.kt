@@ -3,11 +3,9 @@ package com.phoenix.booklet.screen.home.component
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -40,7 +38,8 @@ import java.io.File
 @Composable
 fun BookWidget(
     modifier: Modifier = Modifier,
-    book: Book
+    book: Book,
+    onClick: () -> Unit,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -49,6 +48,7 @@ fun BookWidget(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(8.dp)
             )
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         val (marker, picture, details) = createRefs()

@@ -13,6 +13,7 @@ data class Book(
     val name: String,
     val author: String,
     val translator: String?,
+    val description: String,
     val publisher: String?,
     @ColumnInfo("release_year")
     val releaseYear: String?,

@@ -37,12 +37,14 @@ import androidx.compose.ui.unit.dp
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
 import com.phoenix.booklet.screen.home.component.BookWidget
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(
     isLoading: Boolean,
     books: List<Book>,
+    onClickBook: (id: UUID) -> Unit,
     onClickAdd: () -> Unit,
     selectedFilter: FilterStatus,
     onSelectFilter: (FilterStatus) -> Unit,
@@ -131,7 +133,8 @@ fun HomeScreen(
                             .animateItem()
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),
-                        book = book
+                        book = book,
+                        onClick = { onClickBook(book.id) }
                     )
                 }
             }
