@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,7 @@ import com.phoenix.booklet.utils.deleteFileFromPath
 import com.phoenix.booklet.utils.getUriFromPath
 import com.phoenix.booklet.utils.saveUriAsPhoto
 import com.phoenix.booklet.utils.toHumanReadableDate
+import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
 
@@ -75,7 +77,7 @@ fun InsertBookBottomSheet(
     onClickClose: () -> Unit,
     onClickSave: (Book) -> Unit
 ) {
-    var photoUri: Uri? by remember { mutableStateOf(null) }
+    var photoUri: Uri? by remember { mutableStateOf(getUriFromPath(book?.cover) ?: null) }
     var name by remember { mutableStateOf(book?.name ?: "") }
     var author by remember { mutableStateOf(book?.author ?: "") }
     var isTranslated by remember { mutableStateOf(book?.translator != null) }
@@ -91,6 +93,7 @@ fun InsertBookBottomSheet(
 
     var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.data?.data != null) {
@@ -327,45 +330,47 @@ fun InsertBookBottomSheet(
         Spacer(Modifier.height(16.dp))
         Button(
             onClick = {
-                val uuid = book?.id ?: UUID.randomUUID()
-                val pathUri = getUriFromPath(book?.cover)
-                var filePath: String? = book?.cover // Or null
-                if (pathUri != null && pathUri != photoUri) {
-                    deleteFileFromPath(book?.cover)
-                    filePath = null
-                }
-                if (photoUri != null && pathUri != photoUri) {
-                    val result = saveUriAsPhoto(
-                        context = context,
-                        uri = photoUri,
-                        name = uuid.toString()
-                    )
-                    when (result) {
-                        is FileResult.Error -> Unit
-                        is FileResult.Success -> filePath = result.filePath
+                coroutine.launch {
+                    val uuid = book?.id ?: UUID.randomUUID()
+                    val pathUri = getUriFromPath(book?.cover)
+                    var filePath: String? = book?.cover // Or null
+                    if (pathUri != null && pathUri != photoUri) {
+                        deleteFileFromPath(book?.cover)
+                        filePath = null
                     }
-                }
-                val book = Book(
-                    id = uuid,
-                    name = name,
-                    author = author,
-                    translator = if (isTranslated) translator else null,
-                    description = description,
-                    publisher = publisher,
-                    releaseYear = releaseYear,
-                    publishYear = publishYear,
-                    cover = filePath,
-                    status = status,
-                    dateFinished = if (
-                        status == ReadingStatus.FINISHED || status == ReadingStatus.ARCHIVED
+                    if (photoUri != null && pathUri != photoUri) {
+                        val result = saveUriAsPhoto(
+                            context = context,
+                            uri = photoUri,
+                            name = "${uuid}-${System.currentTimeMillis()}"
+                        )
+                        when (result) {
+                            is FileResult.Error -> Unit
+                            is FileResult.Success -> filePath = result.filePath
+                        }
+                    }
+                    val book = Book(
+                        id = uuid,
+                        name = name,
+                        author = author,
+                        translator = if (isTranslated) translator else null,
+                        description = description,
+                        publisher = publisher,
+                        releaseYear = releaseYear,
+                        publishYear = publishYear,
+                        cover = filePath,
+                        status = status,
+                        dateFinished = if (
+                            status == ReadingStatus.FINISHED || status == ReadingStatus.ARCHIVED
+                        )
+                            date
+                        else null,
+                        dateCreated = book?.dateCreated ?: Date(System.currentTimeMillis()),
+                        dateUpdated = Date(System.currentTimeMillis())
                     )
-                        date
-                    else null,
-                    dateCreated = book?.dateCreated ?: Date(System.currentTimeMillis()),
-                    dateUpdated = Date(System.currentTimeMillis())
-                )
-                isLoading = true
-                onClickSave(book)
+                    isLoading = true
+                    onClickSave(book)
+                }
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth(),

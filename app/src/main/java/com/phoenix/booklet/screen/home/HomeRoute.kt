@@ -41,6 +41,13 @@ fun HomeRoute(
         }
     }
 
+    fun openUpdateDialog(id: UUID) {
+        coroutineScope.launch {
+            homeViewModel.onAction(HomeUiActions.UpdateBookDialog(id))
+            sheetState.show()
+        }
+    }
+
     fun openDetailsDialog(id: UUID) {
         coroutineScope.launch {
             homeViewModel.onAction(HomeUiActions.DetailsDialog(id))
@@ -83,7 +90,31 @@ fun HomeRoute(
                 )
             }
 
-        is HomeDialog.Update -> TODO()
+        is HomeDialog.Update ->
+            ModalBottomSheet(
+                onDismissRequest = {},
+                sheetState = sheetState,
+                properties = ModalBottomSheetProperties(
+                    shouldDismissOnBackPress = false,
+                    shouldDismissOnClickOutside = false
+                ),
+                sheetGesturesEnabled = false,
+                dragHandle = {},
+            ) {
+                val id = remember { (uiState.dialogType as HomeDialog.Update).id }
+                val book = remember { books.first { it.id == id } }
+                InsertBookBottomSheet(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClickClose = { closeDialog() },
+                    onClickSave = {
+                        coroutineScope.launch {
+                            homeViewModel.onAction(HomeUiActions.UpdateBook(it))
+                            closeDialog()
+                        }
+                    },
+                    book = book
+                )
+            }
         is HomeDialog.Details ->
             ModalBottomSheet(
                 onDismissRequest = { closeDialog() },
@@ -94,7 +125,10 @@ fun HomeRoute(
                 BookDetailsBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     book = book,
-                    onClickEdit = {}
+                    onClickEdit = {
+                        closeDialog()
+                        openUpdateDialog(id)
+                    }
                 )
             }
     }

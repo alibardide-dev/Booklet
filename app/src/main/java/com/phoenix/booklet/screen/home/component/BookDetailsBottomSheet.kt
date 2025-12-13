@@ -117,7 +117,7 @@ fun BookDetailsBottomSheet(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "by ${book.author}" +
-                            if(book.translator != null) "\nTranslatedB by ${book.translator}"
+                            if(book.translator != null) "\nTranslated by ${book.translator}"
                             else "",
                     fontSize = 16.sp
                 )
