@@ -36,17 +36,17 @@ fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
         fos.flush()
         fos.close()
-        return FileResult.Success(path.slice(8..<path.length))
+        return FileResult.Success(path.substringAfter("com.phoenix.booklet/files/"))
     } catch (e: Exception) {
         e.printStackTrace()
         return FileResult.Error(e.message)
     }
 }
 
-fun getUriFromPath(path: String?): Uri? {
-    if (path == null)
+fun getUriFromName(context: Context, name: String?): Uri? {
+    if (name == null)
         return null
-    return path.toUri()
+    return File(context.filesDir, name).toUri()
 }
 
 fun deleteFileFromPath(path: String?) {

@@ -63,7 +63,7 @@ import com.phoenix.booklet.data.FileResult
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
 import com.phoenix.booklet.utils.deleteFileFromPath
-import com.phoenix.booklet.utils.getUriFromPath
+import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.saveUriAsPhoto
 import com.phoenix.booklet.utils.toHumanReadableDate
 import kotlinx.coroutines.launch
@@ -77,7 +77,11 @@ fun InsertBookBottomSheet(
     onClickClose: () -> Unit,
     onClickSave: (Book) -> Unit
 ) {
-    var photoUri: Uri? by remember { mutableStateOf(getUriFromPath(book?.cover) ?: null) }
+    var isLoading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
+
+    var photoUri: Uri? by remember { mutableStateOf(getUriFromName(context, book?.cover) ?: null) }
     var name by remember { mutableStateOf(book?.name ?: "") }
     var author by remember { mutableStateOf(book?.author ?: "") }
     var isTranslated by remember { mutableStateOf(book?.translator != null) }
@@ -91,15 +95,13 @@ fun InsertBookBottomSheet(
     var releaseYear by remember { mutableStateOf(book?.releaseYear ?: "") }
     var publishYear by remember { mutableStateOf(book?.publishYear ?: "") }
 
-    var isLoading by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.data?.data != null) {
                 photoUri = it.data?.data
             }
         }
+
     /*
     BOOK INFO
      */
@@ -332,7 +334,7 @@ fun InsertBookBottomSheet(
             onClick = {
                 coroutine.launch {
                     val uuid = book?.id ?: UUID.randomUUID()
-                    val pathUri = getUriFromPath(book?.cover)
+                    val pathUri = getUriFromName(context, book?.cover)
                     var filePath: String? = book?.cover // Or null
                     if (pathUri != null && pathUri != photoUri) {
                         deleteFileFromPath(book?.cover)

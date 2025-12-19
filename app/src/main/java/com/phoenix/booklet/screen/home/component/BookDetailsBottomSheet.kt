@@ -1,6 +1,5 @@
 package com.phoenix.booklet.screen.home.component
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,8 +37,8 @@ import coil3.compose.AsyncImage
 import com.phoenix.booklet.R
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
+import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.toHumanReadableDate
-import java.io.File
 
 @Composable
 fun BookDetailsBottomSheet(
@@ -46,6 +46,8 @@ fun BookDetailsBottomSheet(
     book: Book,
     onClickEdit: (Book) -> Unit,
 ) {
+    val context = LocalContext.current
+
     Column (
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -87,7 +89,7 @@ fun BookDetailsBottomSheet(
             ) {
                 if (book.cover != null)
                     AsyncImage(
-                        model = Uri.fromFile(File(book.cover)),
+                        model = getUriFromName(context, book.cover),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

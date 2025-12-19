@@ -1,6 +1,5 @@
 package com.phoenix.booklet.screen.home.component
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,7 +33,7 @@ import coil3.compose.AsyncImage
 import com.phoenix.booklet.R
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
-import java.io.File
+import com.phoenix.booklet.utils.getUriFromName
 
 @Composable
 fun BookWidget(
@@ -41,6 +41,8 @@ fun BookWidget(
     book: Book,
     onClick: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     ConstraintLayout(
         modifier = modifier
             .border(
@@ -86,7 +88,7 @@ fun BookWidget(
         ) {
             if (book.cover != null)
                 AsyncImage(
-                    model = Uri.fromFile(File(book.cover)),
+                    model = getUriFromName(context, book.cover),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
