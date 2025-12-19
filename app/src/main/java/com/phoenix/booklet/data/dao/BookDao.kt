@@ -2,9 +2,11 @@ package com.phoenix.booklet.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.phoenix.booklet.data.model.Book
+
 
 @Dao
 interface BookDao {
@@ -20,6 +22,9 @@ interface BookDao {
 
     @Query("SELECT * FROM books WHERE id = :id")
     suspend fun getBookDetails(id: Int): Book
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(books: List<Book>)
 
     @Query("DELETE FROM books")
     suspend fun deleteAllBooks()

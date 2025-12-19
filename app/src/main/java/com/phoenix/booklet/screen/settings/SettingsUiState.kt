@@ -8,5 +8,11 @@ data class SettingsUiState(
 
 sealed interface SettingsDialogType {
     data object None: SettingsDialogType
+    data object CreateBackup: SettingsDialogType
+    data object RestoreBackup: SettingsDialogType
+    data object CreateSuccessful: SettingsDialogType
+    data object RestoreSuccessful: SettingsDialogType
+    data object CreateError: SettingsDialogType
+    data object RestoreError: SettingsDialogType
     data object DeleteAll: SettingsDialogType
 }

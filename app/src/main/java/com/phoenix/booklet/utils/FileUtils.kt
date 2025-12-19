@@ -11,7 +11,6 @@ import com.phoenix.booklet.data.FileResult
 import com.phoenix.booklet.data.Result
 import java.io.File
 
-
 fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {
     if (uri == null)
         return FileResult.Error("Uri is null the fuck am I gonna save?")
@@ -60,8 +59,7 @@ fun deleteFileFromPath(path: String?) {
 
 fun deleteAllPictures(context: Context): Result {
     try {
-        val path = "file://${context.filesDir}/"
-        val directory = File(path)
+        val directory = File(context.filesDir, "")
         val files = directory.listFiles()
         files?.forEach {
             if (it.exists())

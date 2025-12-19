@@ -1,9 +1,11 @@
 package com.phoenix.booklet.screen.settings
 
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.phoenix.booklet.data.BackupRepository
 import com.phoenix.booklet.data.Result
 import com.phoenix.booklet.data.dao.BookDao
 import com.phoenix.booklet.utils.deleteAllPictures
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext val context: Context,
-    val booksDao: BookDao
+    val booksDao: BookDao,
+    val backupRepository: BackupRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -26,15 +29,13 @@ class SettingsViewModel @Inject constructor(
 
     fun onAction(action: SettingsUiAction) {
         when (action) {
-            SettingsUiAction.OnClickBackup -> {
+            is SettingsUiAction.CreateBackup ->
+                createBackup(action.uri)
 
-            }
+            is SettingsUiAction.RestoreBackup ->
+                restoreBackup(action.uri)
 
-            SettingsUiAction.OnClickRestore -> {
-
-            }
-
-            SettingsUiAction.OnClickRemoveAll ->
+            SettingsUiAction.RemoveAll ->
                 removeAllData()
 
             SettingsUiAction.DismissDialog ->
@@ -42,6 +43,33 @@ class SettingsViewModel @Inject constructor(
 
             SettingsUiAction.OpenRemoveAllDialog ->
                 _uiState.update { it.copy(dialogType = SettingsDialogType.DeleteAll) }
+
+        }
+    }
+
+    private fun createBackup(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(dialogType = SettingsDialogType.CreateBackup) }
+            val result = backupRepository.createBackup(uri)
+            when(result) {
+                is Result.Error ->
+                    _uiState.update { it.copy(dialogType = SettingsDialogType.CreateError) }
+                Result.Success ->
+                    _uiState.update { it.copy(dialogType = SettingsDialogType.CreateSuccessful) }
+            }
+        }
+    }
+
+    private fun restoreBackup(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(dialogType = SettingsDialogType.RestoreBackup) }
+            val result = backupRepository.restoreBackup(uri)
+            when(result) {
+                is Result.Error ->
+                    _uiState.update { it.copy(dialogType = SettingsDialogType.RestoreError) }
+                Result.Success ->
+                    _uiState.update { it.copy(dialogType = SettingsDialogType.RestoreSuccessful) }
+            }
 
         }
     }

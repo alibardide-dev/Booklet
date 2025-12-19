@@ -59,7 +59,7 @@ fun HomeRoute(
     HomeScreen(
         onClickSettings = { navigateToSettings() },
         isLoading = uiState.isLoading,
-        books = books.reversed(),
+        books = books.sortedBy { it.dateUpdated }.reversed(),
         onClickBook = { openDetailsDialog(it) },
         onClickAdd = { openInsertDialog() },
         selectedFilter = uiState.selectedFilter,
