@@ -4,4 +4,6 @@ sealed interface SettingsUiAction {
     data object OnClickBackup: SettingsUiAction
     data object OnClickRestore: SettingsUiAction
     data object OnClickRemoveAll: SettingsUiAction
+    data object DismissDialog: SettingsUiAction
+    data object OpenRemoveAllDialog: SettingsUiAction
 }

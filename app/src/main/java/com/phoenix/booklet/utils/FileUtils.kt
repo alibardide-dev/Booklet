@@ -6,9 +6,10 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import com.phoenix.booklet.data.FileResult
-import java.io.File
 import androidx.core.net.toUri
+import com.phoenix.booklet.data.FileResult
+import com.phoenix.booklet.data.Result
+import java.io.File
 
 
 fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {
@@ -55,4 +56,21 @@ fun deleteFileFromPath(path: String?) {
     val file = File(path)
     if (file.exists())
         file.delete()
+}
+
+fun deleteAllPictures(context: Context): Result {
+    try {
+        val path = "file://${context.filesDir}/"
+        val directory = File(path)
+        val files = directory.listFiles()
+        files?.forEach {
+            if (it.exists())
+                if (!it.delete())
+                    return Result.Error()
+        }
+        return Result.Success
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return Result.Error(e.message)
+    }
 }

@@ -1,6 +1,7 @@
 package com.phoenix.booklet.screen.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,7 +42,10 @@ import com.phoenix.booklet.ui.theme.BookletTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    onClickBackup: () -> Unit,
+    onClickRestore: () -> Unit,
+    onClickRemoveAll: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -126,6 +130,7 @@ fun SettingsScreen(
                         )
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+                    .clickable { onClickBackup() }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -169,6 +174,7 @@ fun SettingsScreen(
                         )
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+                    .clickable { onClickRestore() }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -262,6 +268,7 @@ fun SettingsScreen(
                         )
                     )
                     .background(MaterialTheme.colorScheme.error)
+                    .clickable { onClickRemoveAll() }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -300,6 +307,11 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreenPreview() {
     BookletTheme {
-        SettingsScreen { }
+        SettingsScreen(
+            onClickBack = {},
+            onClickBackup = {},
+            onClickRestore = {},
+            onClickRemoveAll = {}
+        )
     }
 }

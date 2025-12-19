@@ -20,7 +20,14 @@ fun AppNavigation() {
         }
         composable<NavDestinations.Settings> {
             SettingsRoute(
-                onNavigateBack = { navController.popBackStack() }
+                navigateBack = { navController.popBackStack() },
+                navigateFreshHome = {
+                    navController.navigate(NavDestinations.Home) {
+                        popUpTo(NavDestinations.Settings) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
     }
