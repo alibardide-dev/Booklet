@@ -20,7 +20,8 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeRoute(
-    homeViewModel: HomeViewModel = hiltViewModel()
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    navigateToSettings: () -> Unit,
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val books by homeViewModel.books.collectAsStateWithLifecycle()
@@ -56,6 +57,7 @@ fun HomeRoute(
     }
 
     HomeScreen(
+        onClickSettings = { navigateToSettings() },
         isLoading = uiState.isLoading,
         books = books.reversed(),
         onClickBook = { openDetailsDialog(it) },

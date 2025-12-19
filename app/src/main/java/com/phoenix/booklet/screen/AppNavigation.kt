@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.phoenix.booklet.screen.home.HomeRoute
+import com.phoenix.booklet.screen.settings.SettingsRoute
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -13,7 +14,14 @@ fun AppNavigation() {
 
     NavHost(navController, startDestination = NavDestinations.Home) {
         composable<NavDestinations.Home> {
-            HomeRoute()
+            HomeRoute(
+                navigateToSettings = { navController.navigate(NavDestinations.Settings) }
+            )
+        }
+        composable<NavDestinations.Settings> {
+            SettingsRoute(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }
@@ -21,4 +29,6 @@ fun AppNavigation() {
 sealed interface NavDestinations {
     @Serializable
     data object Home: NavDestinations
+    @Serializable
+    data object Settings: NavDestinations
 }
