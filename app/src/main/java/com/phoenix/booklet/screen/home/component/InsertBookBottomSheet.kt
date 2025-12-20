@@ -10,6 +10,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -81,7 +82,7 @@ fun InsertBookBottomSheet(
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
 
-    var photoUri: Uri? by remember { mutableStateOf(getUriFromName(context, book?.cover) ?: null) }
+    var photoUri: Uri? by remember { mutableStateOf(getUriFromName(context, book?.cover)) }
     var name by remember { mutableStateOf(book?.name ?: "") }
     var author by remember { mutableStateOf(book?.author ?: "") }
     var isTranslated by remember { mutableStateOf(book?.translator != null) }
@@ -139,17 +140,22 @@ fun InsertBookBottomSheet(
                     .aspectRatio(2 / 3f)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                            .apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                setDataAndType(
-                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                    "image/*"
-                                )
-                            }
-                        launcher.launch(intent)
-                    },
+                    .combinedClickable(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_GET_CONTENT)
+                                .apply {
+                                    addCategory(Intent.CATEGORY_OPENABLE)
+                                    setDataAndType(
+                                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                        "image/*"
+                                    )
+                                }
+                            launcher.launch(intent)
+                        },
+                        onLongClick = {
+                            photoUri = null
+                        }
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 if (photoUri != null)
