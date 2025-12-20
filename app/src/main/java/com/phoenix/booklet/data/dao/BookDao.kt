@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.phoenix.booklet.data.model.Book
-
+import java.util.UUID
 
 @Dao
 interface BookDao {
@@ -25,6 +25,9 @@ interface BookDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(books: List<Book>)
+
+    @Query("DELETE FROM books WHERE id in (:ids)")
+    suspend fun deleteBooks(ids: List<UUID>)
 
     @Query("DELETE FROM books")
     suspend fun deleteAllBooks()

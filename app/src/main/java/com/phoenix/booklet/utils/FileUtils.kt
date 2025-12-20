@@ -49,10 +49,10 @@ fun getUriFromName(context: Context, name: String?): Uri? {
     return File(context.filesDir, name).toUri()
 }
 
-fun deleteFileFromPath(path: String?) {
-    if (path == null)
+fun deleteFileFromName(context: Context, name: String?) {
+    if (name == null)
         return
-    val file = File(path)
+    val file = File(context.filesDir, name)
     if (file.exists())
         file.delete()
 }

@@ -62,7 +62,7 @@ import com.phoenix.booklet.R
 import com.phoenix.booklet.data.FileResult
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
-import com.phoenix.booklet.utils.deleteFileFromPath
+import com.phoenix.booklet.utils.deleteFileFromName
 import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.saveUriAsPhoto
 import com.phoenix.booklet.utils.toHumanReadableDate
@@ -337,7 +337,7 @@ fun InsertBookBottomSheet(
                     val pathUri = getUriFromName(context, book?.cover)
                     var filePath: String? = book?.cover // Or null
                     if (pathUri != null && pathUri != photoUri) {
-                        deleteFileFromPath(book?.cover)
+                        deleteFileFromName(context, book?.cover)
                         filePath = null
                     }
                     if (photoUri != null && pathUri != photoUri) {

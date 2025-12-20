@@ -17,4 +17,5 @@ sealed interface HomeDialog {
     data object Insert: HomeDialog
     data class Update(val id: UUID): HomeDialog
     data class Details(val id: UUID): HomeDialog
+    data class Delete(val ids: List<UUID>): HomeDialog
 }

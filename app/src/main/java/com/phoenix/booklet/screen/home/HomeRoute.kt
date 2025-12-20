@@ -1,9 +1,15 @@
 package com.phoenix.booklet.screen.home
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,6 +58,13 @@ fun HomeRoute(
     fun openDetailsDialog(id: UUID) {
         coroutineScope.launch {
             homeViewModel.onAction(HomeUiActions.DetailsDialog(id))
+            sheetState.show()
+        }
+    }
+
+    fun openDeleteDialog(ids: List<UUID>) {
+        coroutineScope.launch {
+            homeViewModel.onAction(HomeUiActions.DeleteDialog(ids))
             sheetState.show()
         }
     }
@@ -130,8 +143,48 @@ fun HomeRoute(
                     onClickEdit = {
                         closeDialog()
                         openUpdateDialog(id)
+                    },
+                    onClickDelete = {
+                        closeDialog()
+                        openDeleteDialog(listOf(id))
                     }
                 )
             }
+
+        is HomeDialog.Delete -> {
+            val ids = (uiState.dialogType as HomeDialog.Delete).ids
+            AlertDialog(
+                onDismissRequest = { closeDialog() },
+                title = { Text("Delete Book") },
+                text = {
+                    Text(
+                        text = if (ids.size > 1) "Are you sure you want to delete ${ids.size} books?" else "Are you sure you want to delete this book?"
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            closeDialog()
+                            homeViewModel.onAction(HomeUiActions.DeleteBooks(ids))
+                                  },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
+                        enabled = !uiState.isLoading
+                    ) {
+                        Text("Yes, Delete")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { closeDialog() },
+                        enabled = !uiState.isLoading
+                    ) {
+                        Text("No, Abort")
+                    }
+                }
+            )
+        }
     }
 }

@@ -15,6 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,7 +48,8 @@ import com.phoenix.booklet.utils.toHumanReadableDate
 fun BookDetailsBottomSheet(
     modifier: Modifier = Modifier,
     book: Book,
-    onClickEdit: (Book) -> Unit,
+    onClickEdit: () -> Unit,
+    onClickDelete: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -169,7 +174,7 @@ fun BookDetailsBottomSheet(
         Spacer(Modifier.height(16.dp))
         OutlinedButton(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onClickEdit(book) },
+            onClick = { onClickEdit() },
             shape = RoundedCornerShape(8.dp)
         ) {
             Icon(
@@ -178,6 +183,25 @@ fun BookDetailsBottomSheet(
             )
             Spacer(Modifier.width(8.dp))
             Text("Edit Details")
+        }
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(Modifier.fillMaxWidth())
+        Spacer(Modifier.height(8.dp))
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onClickDelete() },
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError,
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = null
+            )
+            Spacer(Modifier.width(8.dp))
+            Text("Delete Book")
         }
     }
 }
