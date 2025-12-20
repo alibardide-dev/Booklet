@@ -30,13 +30,13 @@ fun SettingsRoute(
     val createBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
     ) {  uri ->
-        uri?.let { settingsViewModel.onAction(SettingsUiAction.CreateBackup(it)) }
+        uri?.let { settingsViewModel.onAction(SettingsUiActions.CreateBackup(it)) }
     }
 
     val restoreBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) {  uri ->
-        uri?.let { settingsViewModel.onAction(SettingsUiAction.RestoreBackup(it)) }
+        uri?.let { settingsViewModel.onAction(SettingsUiActions.RestoreBackup(it)) }
     }
 
     LaunchedEffect(uiState.isDataDeleted) {
@@ -45,11 +45,11 @@ fun SettingsRoute(
     }
 
     fun closeDialog() {
-        settingsViewModel.onAction(SettingsUiAction.DismissDialog)
+        settingsViewModel.onAction(SettingsUiActions.DismissDialog)
     }
 
     fun openRemoveAllDialog() {
-        settingsViewModel.onAction(SettingsUiAction.OpenRemoveAllDialog)
+        settingsViewModel.onAction(SettingsUiActions.OpenRemoveAllDialog)
     }
 
     SettingsScreen(
@@ -142,7 +142,7 @@ fun SettingsRoute(
                 },
                 confirmButton = {
                     Button(
-                        onClick = { settingsViewModel.onAction(SettingsUiAction.RemoveAll) },
+                        onClick = { settingsViewModel.onAction(SettingsUiActions.RemoveAll) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error,
                             contentColor = MaterialTheme.colorScheme.onError,
@@ -150,6 +150,9 @@ fun SettingsRoute(
                         enabled = !uiState.isLoading
                     ) {
                         Text("Yes, Remove All")
+                        AnimatedVisibility(uiState.isLoading) {
+                            CircularProgressIndicator()
+                        }
                     }
                 },
                 dismissButton = {
@@ -158,9 +161,6 @@ fun SettingsRoute(
                         enabled = !uiState.isLoading
                     ) {
                         Text("No, Abort")
-                        AnimatedVisibility(uiState.isLoading) {
-                            CircularProgressIndicator()
-                        }
                     }
                 }
             )

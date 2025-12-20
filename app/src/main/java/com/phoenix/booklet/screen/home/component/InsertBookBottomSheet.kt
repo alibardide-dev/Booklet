@@ -9,9 +9,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -272,14 +272,12 @@ fun InsertBookBottomSheet(
         ) {
             Row(
                 Modifier
+                    .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clickable { isPickingDate = true }
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     text =
@@ -287,7 +285,9 @@ fun InsertBookBottomSheet(
                             ReadingStatus.FINISHED -> "Finished at ${date.toHumanReadableDate()}"
                             ReadingStatus.ARCHIVED -> "Archived at ${date.toHumanReadableDate()}"
                             else -> ""
-                        }
+                        },
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

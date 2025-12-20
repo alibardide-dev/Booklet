@@ -23,7 +23,7 @@ fun AppNavigation() {
                 navigateBack = { navController.popBackStack() },
                 navigateFreshHome = {
                     navController.navigate(NavDestinations.Home) {
-                        popUpTo(NavDestinations.Settings) {
+                        popUpTo(NavDestinations.Home) {
                             inclusive = true
                         }
                     }

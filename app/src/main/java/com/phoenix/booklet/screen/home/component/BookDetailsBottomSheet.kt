@@ -53,13 +53,13 @@ fun BookDetailsBottomSheet(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        ConstraintLayout {
+        ConstraintLayout(Modifier.fillMaxWidth()) {
             val (marker, picture, details) = createRefs()
             Box(
                 Modifier
                     .constrainAs(marker) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(picture.bottom)
                         start.linkTo(parent.start)
                         height = Dimension.fillToConstraints
                     }
@@ -77,8 +77,7 @@ fun BookDetailsBottomSheet(
             Box(
                 modifier = Modifier
                     .constrainAs(picture) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        linkTo(parent.top, parent.bottom, bias = 0f)
                         start.linkTo(marker.end, margin = 8.dp)
                     }
                     .fillMaxWidth(.25f)
@@ -109,6 +108,9 @@ fun BookDetailsBottomSheet(
                     .constrainAs(details) {
                         top.linkTo(parent.top)
                         start.linkTo(picture.end, margin = 16.dp)
+                        end.linkTo(parent.end)
+                        height = Dimension.preferredWrapContent
+                        width = Dimension.fillToConstraints
                     }
             ) {
                 Text(

@@ -27,21 +27,21 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onAction(action: SettingsUiAction) {
+    fun onAction(action: SettingsUiActions) {
         when (action) {
-            is SettingsUiAction.CreateBackup ->
+            is SettingsUiActions.CreateBackup ->
                 createBackup(action.uri)
 
-            is SettingsUiAction.RestoreBackup ->
+            is SettingsUiActions.RestoreBackup ->
                 restoreBackup(action.uri)
 
-            SettingsUiAction.RemoveAll ->
+            SettingsUiActions.RemoveAll ->
                 removeAllData()
 
-            SettingsUiAction.DismissDialog ->
+            SettingsUiActions.DismissDialog ->
                 _uiState.update { it.copy(dialogType = SettingsDialogType.None) }
 
-            SettingsUiAction.OpenRemoveAllDialog ->
+            SettingsUiActions.OpenRemoveAllDialog ->
                 _uiState.update { it.copy(dialogType = SettingsDialogType.DeleteAll) }
 
         }
