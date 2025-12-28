@@ -1,5 +1,6 @@
 package com.phoenix.booklet.screen.home.component
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
@@ -58,11 +59,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.effect.Crop
 import coil3.compose.rememberAsyncImagePainter
 import com.phoenix.booklet.R
 import com.phoenix.booklet.data.FileResult
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
+import com.phoenix.booklet.utils.cacheFileUri
 import com.phoenix.booklet.utils.deleteFileFromName
 import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.saveUriAsPhoto
@@ -96,12 +99,13 @@ fun InsertBookBottomSheet(
     var releaseYear by remember { mutableStateOf(book?.releaseYear ?: "") }
     var publishYear by remember { mutableStateOf(book?.publishYear ?: "") }
 
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.data?.data != null) {
-                photoUri = it.data?.data
-            }
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        it.data?.data?.let { uri ->
+            photoUri = uri
         }
+    }
 
     /*
     BOOK INFO
@@ -149,8 +153,16 @@ fun InsertBookBottomSheet(
                                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                         "image/*"
                                     )
+                                    putExtra("crop", "true") // NOTE: should be string
+                                    putExtra("outputX", 600) // This is needed, editor can't close without these two
+                                    putExtra("outputY", 400) // This is needed
+
+                                    putExtra("scale", true)
+                                    putExtra("aspectX", 2)
+                                    putExtra("aspectY", 3)
+                                    putExtra("return-data", true)
                                 }
-                            launcher.launch(intent)
+                            pickImageLauncher.launch(intent)
                         },
                         onLongClick = {
                             photoUri = null

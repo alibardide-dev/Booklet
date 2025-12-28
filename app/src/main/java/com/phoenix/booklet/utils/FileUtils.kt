@@ -14,14 +14,9 @@ import java.io.File
 fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {
     if (uri == null)
         return FileResult.Error("Uri is null the fuck am I gonna save?")
-//    val file = File(context.filesDir, "$name.png")
-//    val stream = FileOutputStream(file)
 
-//        stream.write(uri.toString().toByteArray())
-//        stream.close()
-//        return FileResult.Success("${context.filesDir}/$name.png")
     try {
-        val bitmap = if (Build.VERSION.SDK_INT < 28) {
+        var bitmap = if (Build.VERSION.SDK_INT < 28) {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         } else {
             val source = ImageDecoder.createSource(context.contentResolver, uri)
@@ -32,8 +27,39 @@ fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {
         }
         val displayName = "$name.png" // Set the name of the image file here
         val path = "file://${context.filesDir}/$displayName"
+        /*
+        If you're reading this, I have no idea how this works.
+        I mean I have an idea to write it but please don't ask me to explain what I've done.
+        It's been running on hopes and prayers.
+         */
         val fos = context.contentResolver.openOutputStream(path.toUri())!!
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+        // Crop to fit 2:3 ratio
+        bitmap = if (bitmap.width / 2 < bitmap.height / 3) {
+            val newHeight = bitmap.width * (3 / 2).toFloat()
+            val newY = (bitmap.height - newHeight) / 2f
+
+            Bitmap.createBitmap(
+                bitmap,
+                0,
+                newY.toInt(),
+                bitmap.width,
+                newHeight.toInt()
+            )
+        } else {
+            val newWidth = bitmap.height * (2f / 3f)
+            val newX = (bitmap.width - newWidth) / 2f
+
+            Bitmap.createBitmap(
+                bitmap,
+                newX.toInt(),
+                0,
+                newWidth.toInt(),
+            bitmap.height
+            )
+        }
+        // Change Resolution
+        bitmap = Bitmap.createScaledBitmap(bitmap, 300, 450, false)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 80, fos)
         fos.flush()
         fos.close()
         return FileResult.Success(path.substringAfter("com.phoenix.booklet/files/"))
@@ -71,4 +97,8 @@ fun deleteAllPictures(context: Context): Result {
         e.printStackTrace()
         return Result.Error(e.message)
     }
+}
+
+fun cacheFileUri(context: Context): Uri {
+    return File(context.cacheDir, "cached_${System.currentTimeMillis()}.jpg").toUri()
 }
