@@ -1,5 +1,6 @@
 package com.phoenix.booklet.screen.home
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -18,8 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,29 +50,66 @@ import java.util.UUID
 @Composable
 fun HomeScreen(
     onClickSettings: () -> Unit,
+    onBulkDelete: () -> Unit,
     isLoading: Boolean,
+    isSelectMode: Boolean,
     books: List<Book>,
+    isSelected: (id: UUID) -> Boolean,
+    selectedBooksSize: Int,
     onClickBook: (id: UUID) -> Unit,
+    onSelectBook: (id: UUID) -> Unit,
+    exitSelectMode: () -> Unit,
     onClickAdd: () -> Unit,
     selectedFilter: FilterStatus,
     onSelectFilter: (FilterStatus) -> Unit,
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Booklet") },
-                actions = {
-                    IconButton(
-                        onClick = { onClickSettings() },
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Open Settings"
-                        )
-                    }
+            Crossfade(isSelectMode) { target ->
+                if (target) {
+                    TopAppBar(
+                        title = { Text("$selectedBooksSize books selected") },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = { exitSelectMode() },
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                    contentDescription = "Exit Select Mode"
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = { onBulkDelete() },
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = "Exit Select Mode"
+                                )
+                            }
+                        }
+                    )
+                } else {
+                    CenterAlignedTopAppBar(
+                        title = { Text("Booklet") },
+                        actions = {
+                            IconButton(
+                                onClick = { onClickSettings() },
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Open Settings"
+                                )
+                            }
+                        }
+                    )
                 }
-            )
+            }
+
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onClickAdd() }) {
@@ -149,7 +190,16 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),
                         book = book,
-                        onClick = { onClickBook(book.id) }
+                        isSelected = isSelected(book.id),
+                        onClick = {
+                            if (isSelectMode)
+                                onSelectBook(book.id)
+                            else
+                                onClickBook(book.id)
+                        },
+                        onLongClick = {
+                            onSelectBook(book.id)
+                        }
                     )
                 }
             }

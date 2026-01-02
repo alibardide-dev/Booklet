@@ -1,5 +1,6 @@
 package com.phoenix.booklet.screen.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -16,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.phoenix.booklet.screen.home.component.BookDetailsBottomSheet
@@ -31,8 +33,14 @@ fun HomeRoute(
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val books by homeViewModel.books.collectAsStateWithLifecycle()
+    val selectedBooks by homeViewModel.selectedBooks.collectAsStateWithLifecycle()
+
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    BackHandler(uiState.isSelectMode) {
+        homeViewModel.onAction(HomeUiActions.ExitSelection)
+    }
 
     fun closeDialog() {
         coroutineScope.launch {
@@ -71,12 +79,18 @@ fun HomeRoute(
 
     HomeScreen(
         onClickSettings = { navigateToSettings() },
+        onBulkDelete = { openDeleteDialog(selectedBooks) },
         isLoading = uiState.isLoading,
+        isSelectMode = uiState.isSelectMode,
         books = books.sortedBy { it.dateUpdated }.reversed(),
+        isSelected = { id -> selectedBooks.fastFirstOrNull { it == id } != null },
+        selectedBooksSize = selectedBooks.size,
         onClickBook = { openDetailsDialog(it) },
+        onSelectBook = { homeViewModel.onAction(HomeUiActions.SelectBook(it)) },
+        exitSelectMode = { homeViewModel.onAction(HomeUiActions.ExitSelection) },
         onClickAdd = { openInsertDialog() },
         selectedFilter = uiState.selectedFilter,
-        onSelectFilter = { homeViewModel.onAction(HomeUiActions.ApplyFilter(it)) }
+        onSelectFilter = { homeViewModel.onAction(HomeUiActions.ApplyFilter(it)) },
     )
 
     when(uiState.dialogType) {

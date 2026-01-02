@@ -1,6 +1,7 @@
 package com.phoenix.booklet.screen.home
 
 import android.content.Context
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.phoenix.booklet.data.dao.BookDao
@@ -31,6 +32,8 @@ class HomeViewModel @Inject constructor(
 
     private val _books = MutableStateFlow(emptyList<Book>())
     val books = _books.asStateFlow()
+    private val _selectedBooks = MutableStateFlow(emptyList<UUID>())
+    val selectedBooks = _selectedBooks.asStateFlow()
 
     init {
         getAllBooks()
@@ -68,8 +71,32 @@ class HomeViewModel @Inject constructor(
             is HomeUiActions.ApplyFilter ->
                 _uiState.update { it.copy(selectedFilter = action.filter) }
 
-            is HomeUiActions.DeleteBooks ->
+            is HomeUiActions.DeleteBooks -> {
                 removeBooks(action.ids)
+                _uiState.update { it.copy(isSelectMode = false) }
+                _selectedBooks.update { emptyList() }
+            }
+
+            is HomeUiActions.SelectBook -> {
+                // If none exit before operation, initiate select mode
+                if (_selectedBooks.value.isEmpty())
+                    _uiState.update { it.copy(isSelectMode = true) }
+
+                if (_selectedBooks.value.any { it == action.id }) {
+                    _selectedBooks.value -= action.id
+                } else {
+                    _selectedBooks.value += action.id
+                }
+
+                // If non exist after operation, all is deleted, disable selection
+                if (_selectedBooks.value.isEmpty())
+                    _uiState.update { it.copy(isSelectMode = false) }
+            }
+
+            HomeUiActions.ExitSelection -> {
+                _uiState.update { it.copy(isSelectMode = false) }
+                _selectedBooks.update { emptyList() }
+            }
         }
     }
 

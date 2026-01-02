@@ -13,4 +13,6 @@ sealed interface HomeUiActions {
     data class UpdateBook(val book: Book): HomeUiActions
     data class ApplyFilter(val filter: FilterStatus): HomeUiActions
     data class DeleteBooks(val ids: List<UUID>): HomeUiActions
+    data class SelectBook(val id: UUID): HomeUiActions
+    data object ExitSelection: HomeUiActions
 }
