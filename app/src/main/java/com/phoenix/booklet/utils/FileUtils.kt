@@ -35,7 +35,7 @@ fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {
         val fos = context.contentResolver.openOutputStream(path.toUri())!!
         // Crop to fit 2:3 ratio
         bitmap = if (bitmap.width / 2 < bitmap.height / 3) {
-            val newHeight = bitmap.width * (3 / 2).toFloat()
+            val newHeight = bitmap.width * (3f / 2f)
             val newY = (bitmap.height - newHeight) / 2f
 
             Bitmap.createBitmap(
