@@ -22,8 +22,15 @@ You can checkout [latest release](https://github.com/alibardide-dev/News-app/rel
 - [X] Backup data + covers
 - [X] Import data and convers from file
 - [X] Selection / Bulk delete
+- [ ] Categories
+- [ ] Custom Lists
 - [ ] Cloud Backup
 - [ ] Search
+- [ ] Grid View
+- [ ] Check for Updates
+- [ ] Smoother scroll (Pagination)
+- [ ] Rating
+- [ ] Optional Fields
 - [ ] More Ideas
 
 # Repo Structure
@@ -73,4 +80,4 @@ If you like this application, just support it by joining [stargazers](https://gi
 And [follow me](https://github.com/alibardide-dev?tab=followers) for my next creations
 
 # License
-Booklet by [Ali Bardide](News app by Ali Bardide is licensed under a Apache License 2.0.) is licensed under a [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Booklet by [Ali Bardide](https://github.com/alibardide-dev) is licensed under a [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
