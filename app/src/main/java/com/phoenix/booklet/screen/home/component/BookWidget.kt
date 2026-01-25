@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -122,11 +120,10 @@ fun BookWidget(
             ) {
                 Box(
                     modifier = Modifier
-                        .alpha(0.6f)
                         .aspectRatio(2 / 3f)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = .6f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -134,7 +131,8 @@ fun BookWidget(
                         contentDescription = "Selected",
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .padding(4.dp),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }

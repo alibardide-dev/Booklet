@@ -1,8 +1,10 @@
 package com.phoenix.booklet.screen.home.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,9 +18,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -125,25 +126,27 @@ fun BookDetailsBottomSheet(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "by ${book.author}" +
-                            if(book.translator != null) "\nTranslated by ${book.translator}"
-                            else "",
+                    text = "by ${book.author}",
                     fontSize = 16.sp
                 )
+                if (book.translator != null) {
+                    Text(
+                        text = "Translated by ${book.translator}",
+                        fontSize = 16.sp
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "${book.publishYear} • ${book.publisher}",
                     fontSize = 14.sp
                 )
-
+                Text(
+                    text = "Original Release • ${book.releaseYear}",
+                    fontSize = 12.sp
+                )
             }
         }
         Spacer(Modifier.height(16.dp))
-        Text(
-            text = "Original Release • ${book.releaseYear}",
-            fontSize = 12.sp
-        )
-        Spacer(Modifier.height(8.dp))
         Text(
             text = when(book.status) {
                     ReadingStatus.WISHLIST -> "On Wishlist"
@@ -153,55 +156,68 @@ fun BookDetailsBottomSheet(
                 },
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color =
+                when(book.status) {
+                    ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.onTertiaryContainer
+                    ReadingStatus.READING -> MaterialTheme.colorScheme.onSurface
+                    ReadingStatus.FINISHED -> MaterialTheme.colorScheme.onPrimaryContainer
+                    ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
             modifier = Modifier
                 .fillMaxWidth()
-//                .border(
-//                    width = 3.dp,
-//                    color = MaterialTheme.colorScheme.surfaceVariant,
-//                    shape = RoundedCornerShape(8.dp)
-//                )
                 .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(
+                    when(book.status) {
+                        ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.tertiaryContainer
+                        ReadingStatus.READING -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
+                        ReadingStatus.FINISHED -> MaterialTheme.colorScheme.primaryContainer
+                        ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
+                    }
+                )
                 .padding(vertical = 12.dp, horizontal = 16.dp)
         )
         Spacer(Modifier.height(8.dp))
-        Text(
-            text = book.description,
-            fontSize = 14.sp
-        )
-        Spacer(Modifier.height(8.dp))
-        Spacer(Modifier.height(16.dp))
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { onClickEdit() },
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = null
+        if (book.description.isNotEmpty()) {
+            Text(
+                text = book.description,
+                fontSize = 14.sp
             )
-            Spacer(Modifier.width(8.dp))
-            Text("Edit Details")
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(Modifier.height(8.dp))
-        HorizontalDivider(Modifier.fillMaxWidth())
-        Spacer(Modifier.height(8.dp))
-        Button(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onClickDelete() },
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError,
-            )
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Delete,
-                contentDescription = null
-            )
-            Spacer(Modifier.width(8.dp))
-            Text("Delete Book")
+            OutlinedButton(
+                modifier = Modifier.weight(1f),
+                onClick = { onClickDelete() },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete Book"
+                )
+            }
+            OutlinedButton(
+                modifier = Modifier.weight(1f),
+                onClick = { onClickEdit() },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Book"
+                )
+            }
+            OutlinedButton(
+                modifier = Modifier.weight(1f),
+                onClick = {  },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Star,
+                    contentDescription = "Add to favorites"
+                )
+            }
         }
     }
 }

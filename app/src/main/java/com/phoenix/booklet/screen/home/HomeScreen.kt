@@ -1,7 +1,10 @@
 package com.phoenix.booklet.screen.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +35,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -87,7 +91,8 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Delete,
-                                    contentDescription = "Exit Select Mode"
+                                    contentDescription = "Exit Select Mode",
+                                    tint = MaterialTheme.colorScheme.error
                                 )
                             }
                         }
@@ -130,6 +135,7 @@ fun HomeScreen(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { innerPadding ->
+        val filterScrollState = rememberScrollState()
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -138,40 +144,46 @@ fun HomeScreen(
         ) {
             if (books.isNotEmpty() && !isLoading) {
                 stickyHeader {
-                    Row(
-                        modifier = Modifier
-                            .height(IntrinsicSize.Min)
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    AnimatedVisibility(
+                        visible = !isSelectMode,
+                        enter = slideInVertically { -1 },
+                        exit = slideOutVertically { -1 }
                     ) {
-                        Spacer(Modifier.width(16.dp))
-                        FilterChip(
-                            selected = selectedFilter == FilterStatus.ALL,
-                            onClick = { onSelectFilter(FilterStatus.ALL) },
-                            label = { Text("All books") }
-                        )
-                        VerticalDivider(Modifier.fillMaxHeight())
-                        FilterChip(
-                            selected = selectedFilter == FilterStatus.WISHLIST,
-                            onClick = { onSelectFilter(FilterStatus.WISHLIST) },
-                            label = { Text("Wishlist") }
-                        )
-                        FilterChip(
-                            selected = selectedFilter == FilterStatus.READING,
-                            onClick = { onSelectFilter(FilterStatus.READING) },
-                            label = { Text("Reading") }
-                        )
-                        FilterChip(
-                            selected = selectedFilter == FilterStatus.FINISHED,
-                            onClick = { onSelectFilter(FilterStatus.FINISHED) },
-                            label = { Text("Finished") }
-                        )
-                        FilterChip(
-                            selected = selectedFilter == FilterStatus.ARCHIVED,
-                            onClick = { onSelectFilter(FilterStatus.ARCHIVED) },
-                            label = { Text("Archive") }
-                        )
-                        Spacer(Modifier.width(16.dp))
+                        Row(
+                            modifier = Modifier
+                                .height(IntrinsicSize.Min)
+                                .horizontalScroll(filterScrollState),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Spacer(Modifier.width(16.dp))
+                            FilterChip(
+                                selected = selectedFilter == FilterStatus.ALL,
+                                onClick = { onSelectFilter(FilterStatus.ALL) },
+                                label = { Text("All books") }
+                            )
+                            VerticalDivider(Modifier.fillMaxHeight())
+                            FilterChip(
+                                selected = selectedFilter == FilterStatus.WISHLIST,
+                                onClick = { onSelectFilter(FilterStatus.WISHLIST) },
+                                label = { Text("Wishlist") }
+                            )
+                            FilterChip(
+                                selected = selectedFilter == FilterStatus.READING,
+                                onClick = { onSelectFilter(FilterStatus.READING) },
+                                label = { Text("Reading") }
+                            )
+                            FilterChip(
+                                selected = selectedFilter == FilterStatus.FINISHED,
+                                onClick = { onSelectFilter(FilterStatus.FINISHED) },
+                                label = { Text("Finished") }
+                            )
+                            FilterChip(
+                                selected = selectedFilter == FilterStatus.ARCHIVED,
+                                onClick = { onSelectFilter(FilterStatus.ARCHIVED) },
+                                label = { Text("Archive") }
+                            )
+                            Spacer(Modifier.width(16.dp))
+                        }
                     }
                 }
                 items(
