@@ -125,26 +125,32 @@ fun BookDetailsBottomSheet(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "by ${book.author}",
-                    fontSize = 16.sp
-                )
-                if (book.translator != null) {
+                if (book.author.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "by ${book.author}",
+                        fontSize = 16.sp
+                    )
+                }
+                if (book.translator.isNotEmpty()) {
                     Text(
                         text = "Translated by ${book.translator}",
                         fontSize = 16.sp
                     )
                 }
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "${book.publishYear} • ${book.publisher}",
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "Original Release • ${book.releaseYear}",
-                    fontSize = 12.sp
-                )
+                if (book.publishYear.isNotEmpty() || book.publisher.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "${book.publisher} • ${book.publishYear}",
+                        fontSize = 14.sp
+                    )
+                }
+                if (book.releaseYear.isNotEmpty()) {
+                    Text(
+                        text = "Original Release • ${book.releaseYear}",
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
         Spacer(Modifier.height(16.dp))

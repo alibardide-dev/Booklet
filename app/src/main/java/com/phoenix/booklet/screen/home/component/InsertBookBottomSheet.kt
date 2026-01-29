@@ -1,6 +1,5 @@
 package com.phoenix.booklet.screen.home.component
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
@@ -59,13 +58,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.effect.Crop
 import coil3.compose.rememberAsyncImagePainter
 import com.phoenix.booklet.R
 import com.phoenix.booklet.data.FileResult
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
-import com.phoenix.booklet.utils.cacheFileUri
 import com.phoenix.booklet.utils.deleteFileFromName
 import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.saveUriAsPhoto
@@ -195,7 +192,7 @@ fun InsertBookBottomSheet(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text("Book Name") },
+                    placeholder = { Text("Book Name *") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                 )
@@ -373,7 +370,7 @@ fun InsertBookBottomSheet(
                         id = uuid,
                         name = name,
                         author = author,
-                        translator = if (isTranslated) translator else null,
+                        translator = translator,
                         description = description,
                         publisher = publisher,
                         releaseYear = releaseYear,
@@ -394,7 +391,7 @@ fun InsertBookBottomSheet(
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading && name.isNotBlank() && author.isNotBlank() && (!isTranslated || translator.isNotBlank()) && publisher.isNotBlank() && releaseYear.isNotBlank()
+            enabled = !isLoading && name.isNotBlank()
         ) {
             Crossfade(isLoading) { target ->
                 if (target) {

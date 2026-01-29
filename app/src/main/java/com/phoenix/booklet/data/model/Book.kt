@@ -12,13 +12,13 @@ data class Book(
     val id: UUID = UUID.randomUUID(),
     val name: String,
     val author: String,
-    val translator: String?,
+    val translator: String,
     val description: String,
-    val publisher: String?,
+    val publisher: String,
     @ColumnInfo("release_year")
-    val releaseYear: String?,
+    val releaseYear: String,
     @ColumnInfo("publish_year")
-    val publishYear: String?,
+    val publishYear: String,
     val cover: String?,
     val status: ReadingStatus,
     val dateFinished: Date?,

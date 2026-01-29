@@ -154,16 +154,20 @@ fun BookWidget(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "by ${book.author}",
-                fontSize = 16.sp
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "${book.publishYear} • ${book.publisher}",
-                fontSize = 14.sp
-            )
+            if (book.author.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "by ${book.author}",
+                    fontSize = 16.sp
+                )
+            }
+            if (book.publishYear.isNotEmpty() || book.publisher.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "${book.publisher} • ${book.publishYear}",
+                    fontSize = 14.sp
+                )
+            }
 
         }
     }
