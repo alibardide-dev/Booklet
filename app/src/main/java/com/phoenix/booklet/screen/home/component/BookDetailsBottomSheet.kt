@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,10 +74,10 @@ fun BookDetailsBottomSheet(
                     .clip(RoundedCornerShape(2.dp))
                     .background(
                         when(book.status) {
-                            ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.tertiaryContainer
-                            ReadingStatus.READING -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
-                            ReadingStatus.FINISHED -> MaterialTheme.colorScheme.primaryContainer
-                            ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
+                            ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_background)
+                            ReadingStatus.READING -> colorResource(R.color.reading_background)
+                            ReadingStatus.FINISHED -> colorResource(R.color.finished_background)
+                            ReadingStatus.ARCHIVED -> colorResource(R.color.archive_background)
                         }
                     )
             )
@@ -155,23 +156,24 @@ fun BookDetailsBottomSheet(
                     ReadingStatus.ARCHIVED -> "Archived on ${book.dateFinished?.toHumanReadableDate()}"
                 },
             fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color =
                 when(book.status) {
-                    ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.onTertiaryContainer
-                    ReadingStatus.READING -> MaterialTheme.colorScheme.onSurface
-                    ReadingStatus.FINISHED -> MaterialTheme.colorScheme.onPrimaryContainer
-                    ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.onSurfaceVariant
+                    ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_text)
+                    ReadingStatus.READING -> colorResource(R.color.reading_text)
+                    ReadingStatus.FINISHED -> colorResource(R.color.finished_text)
+                    ReadingStatus.ARCHIVED -> colorResource(R.color.archive_text)
                 },
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .background(
                     when(book.status) {
-                        ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.tertiaryContainer
-                        ReadingStatus.READING -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
-                        ReadingStatus.FINISHED -> MaterialTheme.colorScheme.primaryContainer
-                        ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
+                        ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_background)
+                        ReadingStatus.READING -> colorResource(R.color.reading_background)
+                        ReadingStatus.FINISHED -> colorResource(R.color.finished_background)
+                        ReadingStatus.ARCHIVED -> colorResource(R.color.archive_background)
                     }
                 )
                 .padding(vertical = 12.dp, horizontal = 16.dp)

@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -77,10 +78,10 @@ fun BookWidget(
                 .clip(RoundedCornerShape(2.dp))
                 .background(
                     when(book.status) {
-                        ReadingStatus.WISHLIST -> MaterialTheme.colorScheme.tertiaryContainer
-                        ReadingStatus.READING -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
-                        ReadingStatus.FINISHED -> MaterialTheme.colorScheme.primaryContainer
-                        ReadingStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
+                        ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_background)
+                        ReadingStatus.READING -> colorResource(R.color.reading_background)
+                        ReadingStatus.FINISHED -> colorResource(R.color.finished_background)
+                        ReadingStatus.ARCHIVED -> colorResource(R.color.archive_background)
                     }
                 )
         )

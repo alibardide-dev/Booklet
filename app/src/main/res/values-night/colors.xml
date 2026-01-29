@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wishlist colors-->
+    <color name="wishlist_background">#004b6f</color>
+    <color name="wishlist_text">#c9e6ff</color>
+    <!-- Reading Colors-->
+    <color name="reading_background">#643f00</color>
+    <color name="reading_text">#ffddb5</color>
+    <!-- Finished Colors-->
+    <color name="finished_background">#294f20</color>
+    <color name="finished_text">#c1efaf</color>
+   <!-- Archive Colors-->
+    <color name="archive_background">#dde4e1</color>
+    <color name="archive_text">#343b39</color>>
+</resources>
