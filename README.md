@@ -20,17 +20,16 @@ You can checkout [latest release](https://github.com/alibardide-dev/News-app/rel
 - [X] Filter books
 - [X] Set covers
 - [X] Backup data + covers
-- [X] Import data and convers from file
+- [X] Import data and covers from file
 - [X] Selection / Bulk delete
 - [ ] Categories
 - [ ] Custom Lists
 - [ ] Cloud Backup
-- [ ] Search
+- [X] Search
 - [ ] Grid View
-- [ ] Check for Updates
-- [ ] Smoother scroll (Pagination)
+- [X] Check for Updates
 - [ ] Rating
-- [ ] Optional Fields
+- [X] Optional Fields
 - [ ] More Ideas
 
 # Repo Structure
