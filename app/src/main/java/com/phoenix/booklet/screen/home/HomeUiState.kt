@@ -4,7 +4,8 @@ import java.util.UUID
 
 data class HomeUiState(
     val isLoading: Boolean = false,
-    val isSelectMode: Boolean = false,
+    val topBarStatus: TopBarStatus = TopBarStatus.Normal,
+    val searchQuery: String = "",
     val dialogType: HomeDialog = HomeDialog.None,
     val selectedFilter: FilterStatus = FilterStatus.ALL,
     val isUpdateAvailable: Boolean = false,
@@ -12,6 +13,10 @@ data class HomeUiState(
 
 enum class FilterStatus {
     ALL, WISHLIST, READING, FINISHED, ARCHIVED
+}
+
+enum class TopBarStatus {
+    Normal, Search, Select
 }
 
 sealed interface HomeDialog {

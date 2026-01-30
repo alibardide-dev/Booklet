@@ -4,6 +4,10 @@ import com.phoenix.booklet.data.model.Book
 import java.util.UUID
 
 sealed interface HomeUiActions {
+    data object StartSearch: HomeUiActions
+    data class OnSearchQueryChange(val query: String): HomeUiActions
+    data object ExitSelect: HomeUiActions
+    data object ExitSearch: HomeUiActions
     data object DismissDialog: HomeUiActions
     data object InsertBookDialog: HomeUiActions
     data class UpdateBookDialog(val id: UUID): HomeUiActions
@@ -14,5 +18,5 @@ sealed interface HomeUiActions {
     data class ApplyFilter(val filter: FilterStatus): HomeUiActions
     data class DeleteBooks(val ids: List<UUID>): HomeUiActions
     data class SelectBook(val id: UUID): HomeUiActions
-    data object ExitSelection: HomeUiActions
+
 }

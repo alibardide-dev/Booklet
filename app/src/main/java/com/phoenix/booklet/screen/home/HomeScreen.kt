@@ -2,6 +2,7 @@ package com.phoenix.booklet.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Badge
@@ -38,6 +40,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -56,10 +59,14 @@ import java.util.UUID
 @Composable
 fun HomeScreen(
     onClickSettings: () -> Unit,
+    onClickSearch: () -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    exitSearch: () -> Unit,
     isUpdateAvailable: Boolean,
     onBulkDelete: () -> Unit,
     isLoading: Boolean,
-    isSelectMode: Boolean,
+    topBarStatus: TopBarStatus,
     books: List<Book>,
     isSelected: (id: UUID) -> Boolean,
     selectedBooksSize: Int,
@@ -72,56 +79,96 @@ fun HomeScreen(
 ) {
     Scaffold(
         topBar = {
-            Crossfade(isSelectMode) { target ->
-                if (target) {
-                    TopAppBar(
-                        title = { Text("$selectedBooksSize books selected") },
-                        navigationIcon = {
-                            IconButton(
-                                onClick = { exitSelectMode() },
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                                    contentDescription = "Exit Select Mode"
-                                )
-                            }
-                        },
-                        actions = {
-                            IconButton(
-                                onClick = { onBulkDelete() },
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Delete,
-                                    contentDescription = "Exit Select Mode",
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    )
-                } else {
-                    CenterAlignedTopAppBar(
-                        title = { Text("Booklet") },
-                        actions = {
-                            IconButton(
-                                onClick = { onClickSettings() },
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                BadgedBox(
-                                    badge = {
-                                        if (isUpdateAvailable)
-                                            Badge(containerColor = MaterialTheme.colorScheme.error)
+            Crossfade(topBarStatus) { status ->
+                when (status) {
+                    TopBarStatus.Normal -> {
+                        CenterAlignedTopAppBar(
+                            title = { Text("Booklet") },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { onClickSettings() },
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    BadgedBox(
+                                        badge = {
+                                            if (isUpdateAvailable)
+                                                Badge(containerColor = MaterialTheme.colorScheme.error)
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Settings,
+                                            contentDescription = "Open Settings"
+                                        )
                                     }
+                                }
+                            },
+                            actions = {
+                                if (books.isNotEmpty())
+                                    IconButton(
+                                        onClick = { onClickSearch() },
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "Search"
+                                        )
+                                    }
+                            }
+                        )
+                    }
+
+                    TopBarStatus.Search -> {
+                        CenterAlignedTopAppBar(
+                            title = {
+                                OutlinedTextField(
+                                    value = searchQuery,
+                                    onValueChange = onSearchQueryChange,
+                                    placeholder = { Text("Search in books") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { exitSearch() },
+                                    shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Settings,
-                                        contentDescription = "Open Settings"
+                                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                        contentDescription = "Exit Search Mode",
                                     )
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
+
+                    TopBarStatus.Select -> {
+                        TopAppBar(
+                            title = { Text("$selectedBooksSize books selected") },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { exitSelectMode() },
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                        contentDescription = "Exit Select Mode"
+                                    )
+                                }
+                            },
+                            actions = {
+                                IconButton(
+                                    onClick = { onBulkDelete() },
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Delete,
+                                        contentDescription = "Delete Selected",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -149,13 +196,14 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .animateContentSize()
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (books.isNotEmpty() && !isLoading) {
                 stickyHeader {
                     AnimatedVisibility(
-                        visible = !isSelectMode,
+                        visible = topBarStatus == TopBarStatus.Normal,
                         enter = slideInVertically { -1 },
                         exit = slideOutVertically { -1 }
                     ) {
@@ -197,12 +245,17 @@ fun HomeScreen(
                     }
                 }
                 items(
-                    items = when (selectedFilter) {
-                        FilterStatus.ALL -> books
-                        FilterStatus.WISHLIST -> books.filter { it.status == ReadingStatus.WISHLIST }
-                        FilterStatus.READING -> books.filter { it.status == ReadingStatus.READING }
-                        FilterStatus.FINISHED -> books.filter { it.status == ReadingStatus.FINISHED }
-                        FilterStatus.ARCHIVED -> books.filter { it.status == ReadingStatus.ARCHIVED }
+                    items = books.filter {
+                        when(selectedFilter) {
+                            FilterStatus.ALL -> true
+                            FilterStatus.WISHLIST -> it.status == ReadingStatus.WISHLIST
+                            FilterStatus.READING -> it.status == ReadingStatus.READING
+                            FilterStatus.FINISHED -> it.status == ReadingStatus.FINISHED
+                            FilterStatus.ARCHIVED -> it.status == ReadingStatus.ARCHIVED
+                        }
+                    }.filter {
+                        (it.name + it.author + it.translator + it.releaseYear + it.publishYear + it.publisher)
+                            .contains(searchQuery, ignoreCase = true)
                     },
                     key = { it.id }
                 ) { book ->
@@ -214,7 +267,7 @@ fun HomeScreen(
                         book = book,
                         isSelected = isSelected(book.id),
                         onClick = {
-                            if (isSelectMode)
+                            if (topBarStatus == TopBarStatus.Select)
                                 onSelectBook(book.id)
                             else
                                 onClickBook(book.id)
@@ -246,7 +299,7 @@ fun HomeScreen(
                 }
             }
 
-            if(isLoading) {
+            if (isLoading) {
                 item {
                     Column(
                         modifier = Modifier

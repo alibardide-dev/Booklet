@@ -50,6 +50,12 @@ class HomeViewModel @Inject constructor(
 
     fun onAction(action: HomeUiActions) {
         when(action) {
+            HomeUiActions.StartSearch ->
+                _uiState.update { it.copy(topBarStatus = TopBarStatus.Search) }
+
+            is HomeUiActions.OnSearchQueryChange ->
+                _uiState.update { it.copy(searchQuery = action.query) }
+
             HomeUiActions.DismissDialog ->
                 _uiState.update { it.copy(dialogType = None) }
 
@@ -82,14 +88,14 @@ class HomeViewModel @Inject constructor(
 
             is HomeUiActions.DeleteBooks -> {
                 removeBooks(action.ids)
-                _uiState.update { it.copy(isSelectMode = false) }
+                _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal) }
                 _selectedBooks.update { emptyList() }
             }
 
             is HomeUiActions.SelectBook -> {
                 // If none exit before operation, initiate select mode
                 if (_selectedBooks.value.isEmpty())
-                    _uiState.update { it.copy(isSelectMode = true) }
+                    _uiState.update { it.copy(topBarStatus = TopBarStatus.Select) }
 
                 if (_selectedBooks.value.any { it == action.id }) {
                     _selectedBooks.value -= action.id
@@ -99,12 +105,16 @@ class HomeViewModel @Inject constructor(
 
                 // If non exist after operation, all is deleted, disable selection
                 if (_selectedBooks.value.isEmpty())
-                    _uiState.update { it.copy(isSelectMode = false) }
+                    _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal) }
             }
 
-            HomeUiActions.ExitSelection -> {
-                _uiState.update { it.copy(isSelectMode = false) }
+            HomeUiActions.ExitSelect -> {
+                _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal, searchQuery = "") }
                 _selectedBooks.update { emptyList() }
+            }
+
+            HomeUiActions.ExitSearch -> {
+                _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal, searchQuery = "") }
             }
         }
     }

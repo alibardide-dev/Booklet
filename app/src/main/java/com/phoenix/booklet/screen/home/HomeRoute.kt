@@ -38,8 +38,12 @@ fun HomeRoute(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    BackHandler(uiState.isSelectMode) {
-        homeViewModel.onAction(HomeUiActions.ExitSelection)
+    BackHandler(uiState.topBarStatus == TopBarStatus.Search) {
+        homeViewModel.onAction(HomeUiActions.ExitSearch)
+    }
+
+    BackHandler(uiState.topBarStatus == TopBarStatus.Select) {
+        homeViewModel.onAction(HomeUiActions.ExitSelect)
     }
 
     fun closeDialog() {
@@ -79,16 +83,20 @@ fun HomeRoute(
 
     HomeScreen(
         onClickSettings = { navigateToSettings() },
+        onClickSearch = { homeViewModel.onAction(HomeUiActions.StartSearch)},
+        exitSearch = { homeViewModel.onAction(HomeUiActions.ExitSearch) },
+        onSearchQueryChange = { homeViewModel.onAction(HomeUiActions.OnSearchQueryChange(it)) },
+        searchQuery = uiState.searchQuery,
         isUpdateAvailable = uiState.isUpdateAvailable,
         onBulkDelete = { openDeleteDialog(selectedBooks) },
         isLoading = uiState.isLoading,
-        isSelectMode = uiState.isSelectMode,
+        topBarStatus = uiState.topBarStatus,
         books = books.sortedBy { it.dateUpdated }.reversed(),
         isSelected = { id -> selectedBooks.fastFirstOrNull { it == id } != null },
         selectedBooksSize = selectedBooks.size,
         onClickBook = { openDetailsDialog(it) },
         onSelectBook = { homeViewModel.onAction(HomeUiActions.SelectBook(it)) },
-        exitSelectMode = { homeViewModel.onAction(HomeUiActions.ExitSelection) },
+        exitSelectMode = { homeViewModel.onAction(HomeUiActions.ExitSelect) },
         onClickAdd = { openInsertDialog() },
         selectedFilter = uiState.selectedFilter,
         onSelectFilter = { homeViewModel.onAction(HomeUiActions.ApplyFilter(it)) },
