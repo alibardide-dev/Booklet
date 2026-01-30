@@ -6,8 +6,9 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.phoenix.booklet.data.BackupRepository
-import com.phoenix.booklet.data.Result
 import com.phoenix.booklet.data.dao.BookDao
+import com.phoenix.booklet.utils.Result
+import com.phoenix.booklet.utils.UpdateStateHolder
 import com.phoenix.booklet.utils.deleteAllPictures
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,14 +22,34 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     @ApplicationContext val context: Context,
     val booksDao: BookDao,
-    val backupRepository: BackupRepository
+    val backupRepository: BackupRepository,
+    val updateStateHolder: UpdateStateHolder,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            updateStateHolder.updateState.collect { state ->
+                _uiState.update { it.copy(
+                    isCheckingForUpdate = state.isCheckingUpdate,
+                    isUpdateCheckSuccessful = state.isCheckSuccessful,
+                    isUpdateAvailable = state.isUpdateAvailable,
+                    nextUpdateVersion = state.nextUpdateVersion
+                ) }
+            }
+        }
+    }
+
     fun onAction(action: SettingsUiActions) {
         when (action) {
+            SettingsUiActions.CheckForUpdates -> {
+                viewModelScope.launch {
+                    updateStateHolder.checkForUpdates()
+                }
+            }
+
             is SettingsUiActions.CreateBackup ->
                 createBackup(action.uri)
 

@@ -79,6 +79,7 @@ fun HomeRoute(
 
     HomeScreen(
         onClickSettings = { navigateToSettings() },
+        isUpdateAvailable = uiState.isUpdateAvailable,
         onBulkDelete = { openDeleteDialog(selectedBooks) },
         isLoading = uiState.isLoading,
         isSelectMode = uiState.isSelectMode,

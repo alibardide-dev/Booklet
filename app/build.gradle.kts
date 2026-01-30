@@ -7,7 +7,10 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.room)
 }
+
+room.schemaDirectory("$projectDir/schemas")
 
 android {
     namespace = "com.phoenix.booklet"
@@ -65,6 +68,9 @@ dependencies {
     implementation(libs.androidx.material.icons)
     implementation(libs.androidx.media3.effect)
     implementation(libs.kotlinx.serializable)
+    // Retrofit
+    implementation(libs.retrofit2)
+    implementation(libs.retrofit2.gson)
     // Gson
     implementation(libs.gson)
     // Hilt

@@ -60,9 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.phoenix.booklet.R
-import com.phoenix.booklet.data.FileResult
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
+import com.phoenix.booklet.utils.FileResult
 import com.phoenix.booklet.utils.deleteFileFromName
 import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.saveUriAsPhoto

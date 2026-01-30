@@ -1,4 +1,4 @@
-package com.phoenix.booklet.utils
+package com.phoenix.booklet.di
 
 import android.content.Context
 import androidx.room.Room
@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder
 import com.phoenix.booklet.data.AppDatabase
 import com.phoenix.booklet.data.BackupRepository
 import com.phoenix.booklet.data.dao.BookDao
+import com.phoenix.booklet.utils.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,7 +25,7 @@ object DatabaseModule {
         Room.databaseBuilder(
             context = context,
             klass = AppDatabase::class.java,
-            name = DatabaseConstants.DB_NAME
+            name = Constants.DB_NAME
         ).build()
 
     @Provides

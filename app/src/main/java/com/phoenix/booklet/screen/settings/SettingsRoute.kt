@@ -54,9 +54,14 @@ fun SettingsRoute(
 
     SettingsScreen(
         onClickBack = { navigateBack() },
-        onClickBackup = { createBackupLauncher.launch( "booklet_backup_${System.currentTimeMillis()}.zip") },
+        onClickUpdate = { settingsViewModel.onAction(SettingsUiActions.CheckForUpdates) },
+        isCheckingUpdate = uiState.isCheckingForUpdate,
+        isUpdateCheckSuccessful = uiState.isUpdateCheckSuccessful,
+        isUpdateAvailable = uiState.isUpdateAvailable,
+        nextUpdateVersion = uiState.nextUpdateVersion,
+        onClickBackup = { createBackupLauncher.launch("booklet_backup_${System.currentTimeMillis()}.zip") },
         onClickRestore = { restoreBackupLauncher.launch(arrayOf("application/zip")) },
-        onClickRemoveAll = { openRemoveAllDialog() }
+        onClickRemoveAll = { openRemoveAllDialog() },
     )
 
     when(uiState.dialogType) {

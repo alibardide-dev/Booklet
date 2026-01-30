@@ -7,6 +7,7 @@ data class HomeUiState(
     val isSelectMode: Boolean = false,
     val dialogType: HomeDialog = HomeDialog.None,
     val selectedFilter: FilterStatus = FilterStatus.ALL,
+    val isUpdateAvailable: Boolean = false,
 )
 
 enum class FilterStatus {

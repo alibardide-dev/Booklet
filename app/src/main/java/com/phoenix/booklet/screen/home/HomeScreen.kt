@@ -26,6 +26,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,6 +56,7 @@ import java.util.UUID
 @Composable
 fun HomeScreen(
     onClickSettings: () -> Unit,
+    isUpdateAvailable: Boolean,
     onBulkDelete: () -> Unit,
     isLoading: Boolean,
     isSelectMode: Boolean,
@@ -105,10 +108,17 @@ fun HomeScreen(
                                 onClick = { onClickSettings() },
                                 shape = RoundedCornerShape(4.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = "Open Settings"
-                                )
+                                BadgedBox(
+                                    badge = {
+                                        if (isUpdateAvailable)
+                                            Badge(containerColor = MaterialTheme.colorScheme.error)
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = "Open Settings"
+                                    )
+                                }
                             }
                         }
                     )

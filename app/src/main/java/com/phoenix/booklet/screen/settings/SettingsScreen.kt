@@ -1,5 +1,6 @@
 package com.phoenix.booklet.screen.settings
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,14 +11,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +45,15 @@ import com.phoenix.booklet.BuildConfig
 import com.phoenix.booklet.R
 import com.phoenix.booklet.ui.theme.BookletTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onClickBack: () -> Unit,
+    onClickUpdate: () -> Unit,
+    isCheckingUpdate: Boolean,
+    isUpdateCheckSuccessful: Boolean?,
+    isUpdateAvailable: Boolean,
+    nextUpdateVersion: String,
     onClickBackup: () -> Unit,
     onClickRestore: () -> Unit,
     onClickRemoveAll: () -> Unit,
@@ -78,7 +89,14 @@ fun SettingsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomEnd = 4.dp,
+                            bottomStart = 4.dp
+                        )
+                    )
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -110,6 +128,73 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        )
+                    )
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+                    .clickable {
+                        if(!isCheckingUpdate) {
+                            if (isUpdateAvailable) {
+                                uriHandler.openUri("https://github.com/alibardide-dev/Booklet/releases/latest")
+                            } else {
+                                onClickUpdate()
+                            }
+                        }
+                    }
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BadgedBox(
+                    badge = {
+                        if(isUpdateAvailable)
+                            Badge()
+                    }
+                ) {
+                    Crossfade(isCheckingUpdate) { target ->
+                        if (target) {
+                            CircularProgressIndicator(Modifier.size(24.dp))
+                        } else {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_sync),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text =
+                            if (isUpdateAvailable)
+                                "New Version Available: $nextUpdateVersion"
+                            else if (BuildConfig.VERSION_NAME >= nextUpdateVersion)
+                                "You're up to date"
+                            else if (isUpdateCheckSuccessful != null && !isUpdateCheckSuccessful)
+                                "Failed to check updates"
+                            else
+                                "Check for Updates",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
             Spacer(Modifier.height(16.dp))
             Text(
@@ -231,13 +316,13 @@ fun SettingsScreen(
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Could Save",
+                        text = "Cloud Save",
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Will be implemented in future updates",
+                        text = "Not Available Now",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -309,9 +394,14 @@ private fun SettingsScreenPreview() {
     BookletTheme {
         SettingsScreen(
             onClickBack = {},
+            onClickUpdate = {},
+            isCheckingUpdate = false,
+            isUpdateCheckSuccessful = true,
+            isUpdateAvailable = true,
+            nextUpdateVersion = "1.0.0",
             onClickBackup = {},
             onClickRestore = {},
-            onClickRemoveAll = {}
+            onClickRemoveAll = {},
         )
     }
 }

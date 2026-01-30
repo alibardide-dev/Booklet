@@ -3,6 +3,10 @@ package com.phoenix.booklet.screen.settings
 data class SettingsUiState(
     val dialogType: SettingsDialogType = SettingsDialogType.None,
     val isLoading: Boolean = false,
+    val isCheckingForUpdate: Boolean = false,
+    val isUpdateCheckSuccessful: Boolean? = null,
+    val isUpdateAvailable: Boolean = true,
+    val nextUpdateVersion: String = "",
     val isDataDeleted: Boolean = false,
 )
 

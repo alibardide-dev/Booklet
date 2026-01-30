@@ -7,8 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.core.net.toUri
-import com.phoenix.booklet.data.FileResult
-import com.phoenix.booklet.data.Result
 import java.io.File
 
 fun saveUriAsPhoto(context: Context, uri: Uri?, name: String): FileResult {

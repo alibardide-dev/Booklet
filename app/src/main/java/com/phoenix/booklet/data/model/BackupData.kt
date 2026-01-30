@@ -1,9 +1,9 @@
 package com.phoenix.booklet.data.model
 
-import com.phoenix.booklet.utils.DatabaseConstants
+import com.phoenix.booklet.utils.Constants
 
 data class BackupData(
-    val version: Int = DatabaseConstants.DB_VERSION,
+    val version: Int = Constants.DB_VERSION,
     val timestamp: Long,
     val books: List<Book>
 )

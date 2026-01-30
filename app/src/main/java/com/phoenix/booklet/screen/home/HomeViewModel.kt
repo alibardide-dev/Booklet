@@ -1,7 +1,6 @@
 package com.phoenix.booklet.screen.home
 
 import android.content.Context
-import androidx.compose.ui.util.fastFirstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.phoenix.booklet.data.dao.BookDao
@@ -11,6 +10,7 @@ import com.phoenix.booklet.screen.home.HomeDialog.Details
 import com.phoenix.booklet.screen.home.HomeDialog.Insert
 import com.phoenix.booklet.screen.home.HomeDialog.None
 import com.phoenix.booklet.screen.home.HomeDialog.Update
+import com.phoenix.booklet.utils.UpdateStateHolder
 import com.phoenix.booklet.utils.deleteFileFromName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -24,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext val context: Context,
-    val bookDao: BookDao
+    val bookDao: BookDao,
+    val updateStateHolder: UpdateStateHolder,
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -36,7 +37,15 @@ class HomeViewModel @Inject constructor(
     val selectedBooks = _selectedBooks.asStateFlow()
 
     init {
-        getAllBooks()
+        viewModelScope.launch {
+            getAllBooks()
+            updateStateHolder.checkForUpdates()
+        }
+        viewModelScope.launch {
+            updateStateHolder.updateState.collect { state ->
+                _uiState.update { it.copy(isUpdateAvailable = state.isUpdateAvailable) }
+            }
+        }
     }
 
     fun onAction(action: HomeUiActions) {
