@@ -83,19 +83,24 @@ class UpdateStateHolder(val context: Context) {
 
 
 suspend fun requestLatestVersion(): UpdateResult = withContext(Dispatchers.IO) {
-    val request = Request.Builder()
-        .url("https://api.github.com/repos/alibardide-dev/Booklet/releases/latest")
-        .build()
+    try {
+        val request = Request.Builder()
+            .url("https://api.github.com/repos/alibardide-dev/Booklet/releases/latest")
+            .build()
 
-    val response = OkHttpClient().newCall(request).execute()
-    if (response.code != 200)
-        return@withContext UpdateResult.Error("Request Failed: ${response.code}")
+        val response = OkHttpClient().newCall(request).execute()
+        if (response.code != 200)
+            return@withContext UpdateResult.Error("Request Failed: ${response.code}")
 
-    val json = response.body?.string()
-    val version = JSONObject(json).getString("name")
+        val json = response.body?.string()
+        val version = JSONObject(json).getString("name")
 
-    return@withContext UpdateResult.Success(
-        isUpdateAvailable = BuildConfig.VERSION_NAME < version,
-        nextUpdateVersion = version
-    )
+        return@withContext UpdateResult.Success(
+            isUpdateAvailable = BuildConfig.VERSION_NAME < version,
+            nextUpdateVersion = version
+        )
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return@withContext UpdateResult.Error(e.message)
+    }
 }
