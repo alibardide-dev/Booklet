@@ -1,5 +1,6 @@
 package com.phoenix.booklet.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,9 +15,11 @@ fun AppNavigation() {
 
     NavHost(navController, startDestination = NavDestinations.Home) {
         composable<NavDestinations.Home> {
-            HomeRoute(
-                navigateToSettings = { navController.navigate(NavDestinations.Settings) }
-            )
+            Box {
+                HomeRoute(
+                    navigateToSettings = { navController.navigate(NavDestinations.Settings) }
+                )
+            }
         }
         composable<NavDestinations.Settings> {
             SettingsRoute(

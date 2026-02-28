@@ -1,6 +1,7 @@
 package com.phoenix.booklet.screen.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -102,112 +103,118 @@ fun HomeRoute(
         onSelectFilter = { homeViewModel.onAction(HomeUiActions.ApplyFilter(it)) },
     )
 
-    when(uiState.dialogType) {
-        HomeDialog.None -> Unit
+    Box {
+        when(uiState.dialogType) {
+            HomeDialog.None -> Unit
 
-        HomeDialog.Insert ->
-            ModalBottomSheet(
-                onDismissRequest = {},
-                sheetState = sheetState,
-                properties = ModalBottomSheetProperties(
-                    shouldDismissOnBackPress = false,
-                    shouldDismissOnClickOutside = false
-                ),
-                sheetGesturesEnabled = false,
-                dragHandle = {},
-            ) {
-                InsertBookBottomSheet(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClickClose = { closeDialog() },
-                    onClickSave = {
-                        coroutineScope.launch {
-                            homeViewModel.onAction(HomeUiActions.InsertBook(it))
-                            closeDialog()
+            HomeDialog.Insert ->
+                ModalBottomSheet(
+                    onDismissRequest = {},
+                    sheetState = sheetState,
+                    properties = ModalBottomSheetProperties(
+                        shouldDismissOnBackPress = false,
+                        shouldDismissOnClickOutside = false
+                    ),
+                    sheetGesturesEnabled = false,
+                    dragHandle = {},
+                ) {
+                    InsertBookBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClickClose = { closeDialog() },
+                        onClickSave = {
+                            coroutineScope.launch {
+                                homeViewModel.onAction(HomeUiActions.InsertBook(it))
+                                closeDialog()
+                            }
                         }
-                    }
-                )
-            }
-
-        is HomeDialog.Update ->
-            ModalBottomSheet(
-                onDismissRequest = {},
-                sheetState = sheetState,
-                properties = ModalBottomSheetProperties(
-                    shouldDismissOnBackPress = false,
-                    shouldDismissOnClickOutside = false
-                ),
-                sheetGesturesEnabled = false,
-                dragHandle = {},
-            ) {
-                val id = remember { (uiState.dialogType as HomeDialog.Update).id }
-                val book = remember { books.first { it.id == id } }
-                InsertBookBottomSheet(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClickClose = { closeDialog() },
-                    onClickSave = {
-                        coroutineScope.launch {
-                            homeViewModel.onAction(HomeUiActions.UpdateBook(it))
-                            closeDialog()
-                        }
-                    },
-                    book = book
-                )
-            }
-        is HomeDialog.Details ->
-            ModalBottomSheet(
-                onDismissRequest = { closeDialog() },
-                sheetState = sheetState
-            ) {
-                val id = remember { (uiState.dialogType as HomeDialog.Details).id }
-                val book = remember { books.first { it.id == id } }
-                BookDetailsBottomSheet(
-                    modifier = Modifier.fillMaxWidth(),
-                    book = book,
-                    onClickEdit = {
-                        closeDialog()
-                        openUpdateDialog(id)
-                    },
-                    onClickDelete = {
-                        closeDialog()
-                        openDeleteDialog(listOf(id))
-                    }
-                )
-            }
-
-        is HomeDialog.Delete -> {
-            val ids = (uiState.dialogType as HomeDialog.Delete).ids
-            AlertDialog(
-                onDismissRequest = { closeDialog() },
-                title = { Text("Delete Book") },
-                text = {
-                    Text(
-                        text = if (ids.size > 1) "Are you sure you want to delete ${ids.size} books?" else "Are you sure you want to delete this book?"
                     )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            closeDialog()
-                            homeViewModel.onAction(HomeUiActions.DeleteBooks(ids))
-                                  },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
-                        ),
-                        enabled = !uiState.isLoading
-                    ) {
-                        Text("Yes, Delete")
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(
-                        onClick = { closeDialog() },
-                        enabled = !uiState.isLoading
-                    ) {
-                        Text("No, Abort")
-                    }
                 }
-            )
+
+            is HomeDialog.Update ->
+                ModalBottomSheet(
+                    onDismissRequest = {},
+                    sheetState = sheetState,
+                    properties = ModalBottomSheetProperties(
+                        shouldDismissOnBackPress = false,
+                        shouldDismissOnClickOutside = false
+                    ),
+                    sheetGesturesEnabled = false,
+                    dragHandle = {},
+                ) {
+                    val id = (uiState.dialogType as HomeDialog.Update).id
+                    val book = remember(id, books) {
+                        books.firstOrNull { it.id == id }
+                    }
+                    InsertBookBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClickClose = { closeDialog() },
+                        onClickSave = {
+                            coroutineScope.launch {
+                                homeViewModel.onAction(HomeUiActions.UpdateBook(it))
+                                closeDialog()
+                            }
+                        },
+                        book = book
+                    )
+                }
+            is HomeDialog.Details ->
+                ModalBottomSheet(
+                    onDismissRequest = { closeDialog() },
+                    sheetState = sheetState
+                ) {
+                    val id = (uiState.dialogType as HomeDialog.Details).id
+                    val book = remember(id, books) {
+                        books.first { it.id == id }
+                    }
+                    BookDetailsBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        book = book,
+                        onClickEdit = {
+                            closeDialog()
+                            openUpdateDialog(id)
+                        },
+                        onClickDelete = {
+                            closeDialog()
+                            openDeleteDialog(listOf(id))
+                        }
+                    )
+                }
+
+            is HomeDialog.Delete -> {
+                val ids = (uiState.dialogType as HomeDialog.Delete).ids
+                AlertDialog(
+                    onDismissRequest = { closeDialog() },
+                    title = { Text("Delete Book") },
+                    text = {
+                        Text(
+                            text = if (ids.size > 1) "Are you sure you want to delete ${ids.size} books?" else "Are you sure you want to delete this book?"
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                closeDialog()
+                                homeViewModel.onAction(HomeUiActions.DeleteBooks(ids))
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                            enabled = !uiState.isLoading
+                        ) {
+                            Text("Yes, Delete")
+                        }
+                    },
+                    dismissButton = {
+                        OutlinedButton(
+                            onClick = { closeDialog() },
+                            enabled = !uiState.isLoading
+                        ) {
+                            Text("No, Abort")
+                        }
+                    }
+                )
+            }
         }
     }
 }
