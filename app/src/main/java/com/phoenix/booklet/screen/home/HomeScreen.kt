@@ -1,5 +1,6 @@
 package com.phoenix.booklet.screen.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -28,8 +29,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,43 +44,225 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.data.model.ReadingStatus
+import com.phoenix.booklet.screen.home.component.BookDetailsBottomSheet
 import com.phoenix.booklet.screen.home.component.BookWidget
+import com.phoenix.booklet.screen.home.component.InsertBookBottomSheet
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(
     onClickSettings: () -> Unit,
-    onClickSearch: () -> Unit,
-    searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    exitSearch: () -> Unit,
     isUpdateAvailable: Boolean,
-    onBulkDelete: () -> Unit,
     isLoading: Boolean,
-    topBarStatus: TopBarStatus,
     books: List<Book>,
-    isSelected: (id: UUID) -> Boolean,
-    selectedBooksSize: Int,
-    onClickBook: (id: UUID) -> Unit,
-    onSelectBook: (id: UUID) -> Unit,
-    exitSelectMode: () -> Unit,
-    onClickAdd: () -> Unit,
-    selectedFilter: FilterStatus,
-    onSelectFilter: (FilterStatus) -> Unit,
+    requestInsert: (Book) -> Unit,
+    requestUpdate: (Book) -> Unit,
+    requestDelete: (List<UUID>) -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedFilter by remember { mutableStateOf(FilterStatus.ALL) }
+
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var dialogType: HomeDialog by remember { mutableStateOf(HomeDialog.None) }
+    var topBarStatus: TopBarStatus by remember { mutableStateOf(TopBarStatus.Normal) }
+    var selectedBooks = remember { mutableStateListOf<UUID>() }
+
+    BackHandler(topBarStatus == TopBarStatus.Search) {
+        searchQuery = ""
+        onSearchQueryChange("")
+        topBarStatus = TopBarStatus.Normal
+    }
+
+    BackHandler(topBarStatus == TopBarStatus.Select) {
+        selectedBooks.clear()
+        topBarStatus = TopBarStatus.Normal
+    }
+
+    AnimatedVisibility(
+        visible = dialogType != HomeDialog.None,
+        enter = slideInVertically(),
+        exit = slideOutVertically()
+    ) {
+        when (dialogType) {
+            HomeDialog.None -> {}
+
+            HomeDialog.Insert ->
+                ModalBottomSheet(
+                    onDismissRequest = {},
+                    sheetState = sheetState,
+                    properties = ModalBottomSheetProperties(
+                        shouldDismissOnBackPress = false,
+                        shouldDismissOnClickOutside = false
+                    ),
+                    sheetGesturesEnabled = false,
+                    dragHandle = {},
+                ) {
+                    InsertBookBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClickClose = {
+                            scope.launch {
+                                sheetState.hide()
+                                dialogType = HomeDialog.None
+                            }
+                        },
+                        onClickSave = {
+                            scope.launch {
+                                requestInsert(it)
+                                sheetState.hide()
+                                dialogType = HomeDialog.None
+                            }
+                        }
+                    )
+                }
+
+            is HomeDialog.Update ->
+                ModalBottomSheet(
+                    onDismissRequest = {},
+                    sheetState = sheetState,
+                    properties = ModalBottomSheetProperties(
+                        shouldDismissOnBackPress = false,
+                        shouldDismissOnClickOutside = false
+                    ),
+                    sheetGesturesEnabled = false,
+                    dragHandle = {},
+                ) {
+                    val id = (dialogType as HomeDialog.Update).id
+                    val book = remember(id, books) {
+                        books.firstOrNull { it.id == id }
+                    }
+                    InsertBookBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClickClose = {
+                            scope.launch {
+                                sheetState.hide()
+                                dialogType = HomeDialog.None
+                            }
+                        },
+                        onClickSave = {
+                            scope.launch {
+                                requestUpdate(it)
+                                sheetState.hide()
+                                dialogType = HomeDialog.None
+                            }
+                        },
+                        book = book
+                    )
+                }
+
+            is HomeDialog.Details ->
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        scope.launch {
+                            sheetState.hide()
+                            dialogType = HomeDialog.None
+                        }
+                    },
+                    sheetState = sheetState
+                ) {
+                    val id = (dialogType as HomeDialog.Details).id
+                    val book = remember(id, books) {
+                        books.first { it.id == id }
+                    }
+                    BookDetailsBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        book = book,
+                        onClickEdit = {
+                            scope.launch {
+                                sheetState.hide()
+                                dialogType = HomeDialog.Update(id)
+                                sheetState.show()
+                            }
+                        },
+                        onClickDelete = {
+                            scope.launch {
+                                sheetState.hide()
+                                dialogType = HomeDialog.Delete(listOf(id))
+                                sheetState.show()
+                            }
+                        }
+                    )
+                }
+
+            is HomeDialog.Delete -> {
+                val ids = (dialogType as HomeDialog.Delete).ids
+                AlertDialog(
+                    onDismissRequest = {
+                        scope.launch {
+                            sheetState.hide()
+                            dialogType = HomeDialog.None
+                        }
+                    },
+                    title = { Text("Delete Book") },
+                    text = {
+                        Text(
+                            text = if (ids.size > 1) "Are you sure you want to delete ${ids.size} books?" else "Are you sure you want to delete this book?"
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    sheetState.hide()
+                                    dialogType = HomeDialog.None
+                                    requestDelete(ids)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                            enabled = !isLoading
+                        ) {
+                            Text("Yes, Delete")
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    sheetState.hide()
+                                    dialogType = HomeDialog.None
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary,
+                            ),
+                            enabled = !isLoading
+                        ) {
+                            Text("No, Abort")
+                        }
+                    }
+                )
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             Crossfade(topBarStatus) { status ->
@@ -105,7 +291,7 @@ fun HomeScreen(
                             actions = {
                                 if (books.isNotEmpty())
                                     IconButton(
-                                        onClick = { onClickSearch() },
+                                        onClick = { topBarStatus = TopBarStatus.Search },
                                         shape = RoundedCornerShape(4.dp)
                                     ) {
                                         Icon(
@@ -122,14 +308,17 @@ fun HomeScreen(
                             title = {
                                 OutlinedTextField(
                                     value = searchQuery,
-                                    onValueChange = onSearchQueryChange,
+                                    onValueChange = {
+                                        searchQuery = it
+                                        onSearchQueryChange(it)
+                                    },
                                     placeholder = { Text("Search in books") },
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             },
                             navigationIcon = {
                                 IconButton(
-                                    onClick = { exitSearch() },
+                                    onClick = { topBarStatus = TopBarStatus.Normal },
                                     shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Icon(
@@ -143,10 +332,10 @@ fun HomeScreen(
 
                     TopBarStatus.Select -> {
                         TopAppBar(
-                            title = { Text("$selectedBooksSize books selected") },
+                            title = { Text("${selectedBooks.size} books selected") },
                             navigationIcon = {
                                 IconButton(
-                                    onClick = { exitSelectMode() },
+                                    onClick = { topBarStatus = TopBarStatus.Normal },
                                     shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Icon(
@@ -157,7 +346,7 @@ fun HomeScreen(
                             },
                             actions = {
                                 IconButton(
-                                    onClick = { onBulkDelete() },
+                                    onClick = { dialogType = HomeDialog.Delete(selectedBooks) },
                                     shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Icon(
@@ -174,7 +363,14 @@ fun HomeScreen(
 
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onClickAdd() }) {
+            FloatingActionButton(
+                onClick = {
+                    dialogType = HomeDialog.Insert
+                    scope.launch {
+                        sheetState.show()
+                    }
+                }
+            ) {
                 Row(
                     modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -216,28 +412,28 @@ fun HomeScreen(
                             Spacer(Modifier.width(16.dp))
                             FilterChip(
                                 selected = selectedFilter == FilterStatus.ALL,
-                                onClick = { onSelectFilter(FilterStatus.ALL) },
+                                onClick = { selectedFilter = FilterStatus.ALL },
                                 label = { Text("All books") }
                             )
                             VerticalDivider(Modifier.fillMaxHeight())
                             FilterChip(
                                 selected = selectedFilter == FilterStatus.WISHLIST,
-                                onClick = { onSelectFilter(FilterStatus.WISHLIST) },
+                                onClick = { selectedFilter = FilterStatus.WISHLIST },
                                 label = { Text("Wishlist") }
                             )
                             FilterChip(
                                 selected = selectedFilter == FilterStatus.READING,
-                                onClick = { onSelectFilter(FilterStatus.READING) },
+                                onClick = { selectedFilter = FilterStatus.READING },
                                 label = { Text("Reading") }
                             )
                             FilterChip(
                                 selected = selectedFilter == FilterStatus.FINISHED,
-                                onClick = { onSelectFilter(FilterStatus.FINISHED) },
+                                onClick = { selectedFilter = FilterStatus.FINISHED },
                                 label = { Text("Finished") }
                             )
                             FilterChip(
                                 selected = selectedFilter == FilterStatus.ARCHIVED,
-                                onClick = { onSelectFilter(FilterStatus.ARCHIVED) },
+                                onClick = { selectedFilter = FilterStatus.ARCHIVED },
                                 label = { Text("Archive") }
                             )
                             Spacer(Modifier.width(16.dp))
@@ -265,15 +461,25 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),
                         book = book,
-                        isSelected = isSelected(book.id),
+                        isSelected = selectedBooks.any { book.id == it},
                         onClick = {
-                            if (topBarStatus == TopBarStatus.Select)
-                                onSelectBook(book.id)
-                            else
-                                onClickBook(book.id)
+                            if (topBarStatus == TopBarStatus.Select) {
+                                if (selectedBooks.any { book.id == it }) {
+                                    selectedBooks.remove(book.id)
+                                    if (selectedBooks.isEmpty())
+                                        topBarStatus = TopBarStatus.Normal
+                                } else
+                                    selectedBooks.add(book.id)
+                            } else {
+                                scope.launch {
+                                    dialogType = HomeDialog.Details(book.id)
+                                    sheetState.show()
+                                }
+                            }
                         },
                         onLongClick = {
-                            onSelectBook(book.id)
+                            selectedBooks.add(book.id)
+                            topBarStatus = TopBarStatus.Select
                         }
                     )
                 }

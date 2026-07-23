@@ -2,6 +2,7 @@ package com.phoenix.booklet.screen.settings
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,13 +14,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,6 +87,7 @@ fun SettingsScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(vertical = 16.dp, horizontal = 24.dp)
@@ -116,16 +122,14 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                IconButton(
+                Button(
                     onClick = {
                         uriHandler.openUri("https://GitHub.com/alibardide-dev/Booklet")
                     },
-                    shape = RoundedCornerShape(4.dp)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_github),
                         contentDescription = "Open GitHub",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -195,6 +199,46 @@ fun SettingsScreen(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+            }
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomEnd = 4.dp,
+                            bottomStart = 4.dp
+                        )
+                    )
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+            ) {
+                Text(
+                    text = "A",
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    fontSize = 32.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.onTertiaryContainer)
+                )
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = "Ali Bardide",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                    Text(
+                        text = "Developer",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
             }
             Spacer(Modifier.height(16.dp))
             Text(
@@ -352,29 +396,31 @@ fun SettingsScreen(
                             bottomEnd = 16.dp
                         )
                     )
-                    .background(MaterialTheme.colorScheme.error)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.error,
+                        shape = RoundedCornerShape(16.dp)
+                    )
                     .clickable { onClickRemoveAll() }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Delete,
+                    imageVector = Icons.Outlined.Delete,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onError
+                    tint = MaterialTheme.colorScheme.error
                 )
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
                         text = "Delete All Data",
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onError,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Remove EVERYTHING in Booklet",
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onError,
                     )
                 }
                 Spacer(Modifier.width(8.dp))

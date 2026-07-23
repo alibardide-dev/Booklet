@@ -5,11 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.phoenix.booklet.data.dao.BookDao
 import com.phoenix.booklet.data.model.Book
-import com.phoenix.booklet.screen.home.HomeDialog.Delete
-import com.phoenix.booklet.screen.home.HomeDialog.Details
-import com.phoenix.booklet.screen.home.HomeDialog.Insert
-import com.phoenix.booklet.screen.home.HomeDialog.None
-import com.phoenix.booklet.screen.home.HomeDialog.Update
 import com.phoenix.booklet.utils.UpdateStateHolder
 import com.phoenix.booklet.utils.deleteFileFromName
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,26 +45,8 @@ class HomeViewModel @Inject constructor(
 
     fun onAction(action: HomeUiActions) {
         when(action) {
-            HomeUiActions.StartSearch ->
-                _uiState.update { it.copy(topBarStatus = TopBarStatus.Search) }
-
             is HomeUiActions.OnSearchQueryChange ->
                 _uiState.update { it.copy(searchQuery = action.query) }
-
-            HomeUiActions.DismissDialog ->
-                _uiState.update { it.copy(dialogType = None) }
-
-            HomeUiActions.InsertBookDialog ->
-                _uiState.update { it.copy(dialogType = Insert) }
-
-            is HomeUiActions.UpdateBookDialog ->
-                _uiState.update { it.copy(dialogType = Update(action.id)) }
-
-            is HomeUiActions.DetailsDialog ->
-                _uiState.update { it.copy(dialogType = Details(action.id)) }
-
-            is HomeUiActions.DeleteDialog ->
-                _uiState.update { it.copy(dialogType = Delete(action.ids)) }
 
             is HomeUiActions.InsertBook ->
                 viewModelScope.launch {
@@ -106,15 +83,6 @@ class HomeViewModel @Inject constructor(
                 // If non exist after operation, all is deleted, disable selection
                 if (_selectedBooks.value.isEmpty())
                     _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal) }
-            }
-
-            HomeUiActions.ExitSelect -> {
-                _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal, searchQuery = "") }
-                _selectedBooks.update { emptyList() }
-            }
-
-            HomeUiActions.ExitSearch -> {
-                _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal, searchQuery = "") }
             }
         }
     }

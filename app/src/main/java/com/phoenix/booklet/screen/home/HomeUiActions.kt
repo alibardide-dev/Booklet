@@ -4,15 +4,7 @@ import com.phoenix.booklet.data.model.Book
 import java.util.UUID
 
 sealed interface HomeUiActions {
-    data object StartSearch: HomeUiActions
     data class OnSearchQueryChange(val query: String): HomeUiActions
-    data object ExitSelect: HomeUiActions
-    data object ExitSearch: HomeUiActions
-    data object DismissDialog: HomeUiActions
-    data object InsertBookDialog: HomeUiActions
-    data class UpdateBookDialog(val id: UUID): HomeUiActions
-    data class DetailsDialog(val id: UUID): HomeUiActions
-    data class DeleteDialog(val ids: List<UUID>): HomeUiActions
     data class InsertBook(val book: Book): HomeUiActions
     data class UpdateBook(val book: Book): HomeUiActions
     data class ApplyFilter(val filter: FilterStatus): HomeUiActions

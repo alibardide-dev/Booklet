@@ -6,7 +6,6 @@ data class HomeUiState(
     val isLoading: Boolean = false,
     val topBarStatus: TopBarStatus = TopBarStatus.Normal,
     val searchQuery: String = "",
-    val dialogType: HomeDialog = HomeDialog.None,
     val selectedFilter: FilterStatus = FilterStatus.ALL,
     val isUpdateAvailable: Boolean = false,
 )
