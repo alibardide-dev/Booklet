@@ -35,6 +35,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,27 +47,78 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.phoenix.booklet.BuildConfig
 import com.phoenix.booklet.R
-import com.phoenix.booklet.ui.theme.BookletTheme
+import com.phoenix.booklet.data.model.BackupState
+import com.phoenix.booklet.screen.settings.component.SettingsBackupBottomSheet
+import com.phoenix.booklet.screen.settings.component.SettingsDeleteAllBottomSheet
+import com.phoenix.booklet.screen.settings.component.SettingsRestoreBottomSheet
+import com.phoenix.booklet.utils.UpdateStatus
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onClickBack: () -> Unit,
     onClickUpdate: () -> Unit,
-    isCheckingUpdate: Boolean,
-    isUpdateCheckSuccessful: Boolean?,
-    isUpdateAvailable: Boolean,
+    updateStatus: UpdateStatus,
     nextUpdateVersion: String,
-    onClickBackup: () -> Unit,
-    onClickRestore: () -> Unit,
-    onClickRemoveAll: () -> Unit,
+    backupState: BackupState,
+    isLoading: Boolean,
+    isDataDeleted: Boolean,
+    requestBackup: () -> Unit,
+    requestRestore: () -> Unit,
+    requestDeleteData: () -> Unit,
+    requestRestart: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+    var dialogType: SettingsDialog by remember { mutableStateOf(SettingsDialog.None) }
+
+    if (dialogType == SettingsDialog.Backup) {
+        SettingsBackupBottomSheet(
+            onDismiss = { dialogType = SettingsDialog.None },
+            onConfirm = { dialogType = SettingsDialog.None },
+            backupState = backupState
+        )
+    }
+
+    if (dialogType == SettingsDialog.Restore) {
+        SettingsRestoreBottomSheet(
+            onDismiss = {
+                if (backupState is BackupState.Success)
+                    requestRestart()
+                else
+                dialogType = SettingsDialog.None
+                        },
+            onConfirm = {
+                if (backupState is BackupState.Success)
+                    requestRestart()
+                else
+                    dialogType = SettingsDialog.None
+            },
+            backupState = backupState
+        )
+    }
+
+    if (dialogType == SettingsDialog.DeleteAll) {
+        SettingsDeleteAllBottomSheet(
+            onDismiss = {
+                if (isDataDeleted)
+                    requestRestart()
+                else
+                    dialogType = SettingsDialog.None
+            },
+            onConfirm = {
+                if (isDataDeleted)
+                    requestRestart()
+                else
+                    requestDeleteData()
+            },
+            isLoading = isLoading,
+            isDone = isDataDeleted
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -147,8 +202,8 @@ fun SettingsScreen(
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
                     .clickable {
-                        if(!isCheckingUpdate) {
-                            if (isUpdateAvailable) {
+                        if (updateStatus != UpdateStatus.CHECKING) {
+                            if (updateStatus == UpdateStatus.AVAILABLE) {
                                 uriHandler.openUri("https://github.com/alibardide-dev/Booklet/releases/latest")
                             } else {
                                 onClickUpdate()
@@ -161,11 +216,11 @@ fun SettingsScreen(
             ) {
                 BadgedBox(
                     badge = {
-                        if(isUpdateAvailable)
+                        if (updateStatus == UpdateStatus.AVAILABLE)
                             Badge()
                     }
                 ) {
-                    Crossfade(isCheckingUpdate) { target ->
+                    Crossfade(updateStatus == UpdateStatus.AVAILABLE) { target ->
                         if (target) {
                             CircularProgressIndicator(Modifier.size(24.dp))
                         } else {
@@ -181,11 +236,11 @@ fun SettingsScreen(
                 Column(Modifier.weight(1f)) {
                     Text(
                         text =
-                            if (isUpdateAvailable)
+                            if (updateStatus == UpdateStatus.AVAILABLE)
                                 "New Version Available: $nextUpdateVersion"
                             else if (BuildConfig.VERSION_NAME >= nextUpdateVersion)
                                 "You're up to date"
-                            else if (isUpdateCheckSuccessful != null && !isUpdateCheckSuccessful)
+                            else if (updateStatus == UpdateStatus.FAILED)
                                 "Failed to check updates"
                             else
                                 "Check for Updates",
@@ -259,7 +314,10 @@ fun SettingsScreen(
                         )
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
-                    .clickable { onClickBackup() }
+                    .clickable {
+                        requestBackup()
+                        dialogType = SettingsDialog.Backup
+                    }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -303,7 +361,10 @@ fun SettingsScreen(
                         )
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
-                    .clickable { onClickRestore() }
+                    .clickable {
+                        requestRestore()
+                        dialogType = SettingsDialog.Restore
+                    }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -401,7 +462,7 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.error,
                         shape = RoundedCornerShape(16.dp)
                     )
-                    .clickable { onClickRemoveAll() }
+                    .clickable { dialogType = SettingsDialog.DeleteAll }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -431,23 +492,5 @@ fun SettingsScreen(
                 )
             }
         }
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-private fun SettingsScreenPreview() {
-    BookletTheme {
-        SettingsScreen(
-            onClickBack = {},
-            onClickUpdate = {},
-            isCheckingUpdate = false,
-            isUpdateCheckSuccessful = true,
-            isUpdateAvailable = true,
-            nextUpdateVersion = "1.0.0",
-            onClickBackup = {},
-            onClickRestore = {},
-            onClickRemoveAll = {},
-        )
     }
 }

@@ -54,6 +54,7 @@ fun BookWidget(
 
     ConstraintLayout(
         modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
             .border(
                 width = 2.dp,
                 color = MaterialTheme.colorScheme.surfaceVariant,

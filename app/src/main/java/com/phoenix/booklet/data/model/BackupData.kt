@@ -11,6 +11,6 @@ data class BackupData(
 sealed class BackupState {
     object Idle : BackupState()
     data class InProgress(val progress: Int) : BackupState()
-    data class Success(val message: String) : BackupState()
-    data class Error(val error: String) : BackupState()
+    data class Success(val message: String? = null) : BackupState()
+    data class Error(val error: String? = null) : BackupState()
 }

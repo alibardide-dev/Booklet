@@ -72,7 +72,7 @@ import java.util.Date
 import java.util.UUID
 
 @Composable
-fun InsertBookBottomSheet(
+internal fun InsertBookBottomSheet(
     modifier: Modifier = Modifier,
     book: Book? = null,
     onClickClose: () -> Unit,

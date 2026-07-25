@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,13 +48,14 @@ import com.phoenix.booklet.utils.getUriFromName
 import com.phoenix.booklet.utils.toHumanReadableDate
 
 @Composable
-fun BookDetailsBottomSheet(
+internal fun BookDetailsBottomSheet(
     modifier: Modifier = Modifier,
     book: Book,
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
 ) {
     val context = LocalContext.current
+    var isZoomed by remember { mutableStateOf(false) }
 
     Column (
         modifier = modifier

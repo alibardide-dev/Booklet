@@ -12,11 +12,13 @@ import okhttp3.Request
 import org.json.JSONObject
 
 data class UpdateState(
-    val isCheckingUpdate: Boolean = false,
-    val isCheckSuccessful: Boolean? = null,
-    val isUpdateAvailable: Boolean = false,
+    val updateStatus: UpdateStatus = UpdateStatus.IDLE,
     val nextUpdateVersion: String = ""
 )
+
+enum class UpdateStatus {
+    IDLE, CHECKING, AVAILABLE, LATEST, FAILED
+}
 
 class UpdateStateHolder(val context: Context) {
 
@@ -33,26 +35,22 @@ class UpdateStateHolder(val context: Context) {
             prefs.getString(Constants.SETTING_UPDATE_VERSION, BuildConfig.VERSION_NAME)
 
         setUpdateState(
-            isCheckingUpdate = false,
-            isCheckSuccessful = null,
-            isUpdateAvailable = isUpdateAvailable,
+            updateStatus = if (isUpdateAvailable) UpdateStatus.AVAILABLE else UpdateStatus.LATEST,
             nextUpdateVersion = nextUpdateVersion
         )
     }
 
     suspend fun checkForUpdates() {
-        _updateState.update { it.copy(isCheckingUpdate = true) }
+        _updateState.update { it.copy(updateStatus = UpdateStatus.CHECKING) }
         val result = requestLatestVersion()
-        _updateState.update { it.copy(isCheckingUpdate = false) }
+        _updateState.update { it.copy(updateStatus = UpdateStatus.IDLE) }
         when(result) {
             is UpdateResult.Error -> {
-                _updateState.update { it.copy(isCheckSuccessful = false) }
+                _updateState.update { it.copy(updateStatus = UpdateStatus.FAILED) }
             }
             is UpdateResult.Success -> {
                 setUpdateState(
-                    isCheckingUpdate = false,
-                    isCheckSuccessful = true,
-                    isUpdateAvailable = result.isUpdateAvailable,
+                    updateStatus = if (result.isUpdateAvailable) UpdateStatus.AVAILABLE else UpdateStatus.LATEST,
                     nextUpdateVersion = result.nextUpdateVersion
                 )
             }
@@ -60,16 +58,12 @@ class UpdateStateHolder(val context: Context) {
     }
 
     fun setUpdateState(
-        isCheckingUpdate: Boolean,
-        isCheckSuccessful: Boolean?,
-        isUpdateAvailable: Boolean,
+        updateStatus: UpdateStatus,
         nextUpdateVersion: String?
     ) {
         _updateState.update {
             it.copy(
-                isCheckingUpdate = isCheckingUpdate,
-                isCheckSuccessful = isCheckSuccessful,
-                isUpdateAvailable = isUpdateAvailable,
+                updateStatus = updateStatus,
                 nextUpdateVersion = nextUpdateVersion ?: ""
             )
         }

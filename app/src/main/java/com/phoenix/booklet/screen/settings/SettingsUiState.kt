@@ -1,22 +1,19 @@
 package com.phoenix.booklet.screen.settings
 
+import com.phoenix.booklet.data.model.BackupState
+import com.phoenix.booklet.utils.UpdateStatus
+
 data class SettingsUiState(
-    val dialogType: SettingsDialogType = SettingsDialogType.None,
     val isLoading: Boolean = false,
-    val isCheckingForUpdate: Boolean = false,
-    val isUpdateCheckSuccessful: Boolean? = null,
-    val isUpdateAvailable: Boolean = true,
+    val updateStatus: UpdateStatus = UpdateStatus.IDLE,
     val nextUpdateVersion: String = "",
     val isDataDeleted: Boolean = false,
+    val backupState: BackupState = BackupState.Idle
 )
 
-sealed interface SettingsDialogType {
-    data object None: SettingsDialogType
-    data object CreateBackup: SettingsDialogType
-    data object RestoreBackup: SettingsDialogType
-    data object CreateSuccessful: SettingsDialogType
-    data object RestoreSuccessful: SettingsDialogType
-    data object CreateError: SettingsDialogType
-    data object RestoreError: SettingsDialogType
-    data object DeleteAll: SettingsDialogType
+sealed interface SettingsDialog {
+    data object None: SettingsDialog
+    data object Backup: SettingsDialog
+    data object Restore: SettingsDialog
+    data object DeleteAll: SettingsDialog
 }

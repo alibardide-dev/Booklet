@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.phoenix.booklet.data.dao.BookDao
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.utils.UpdateStateHolder
+import com.phoenix.booklet.utils.UpdateStatus
 import com.phoenix.booklet.utils.deleteFileFromName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -28,17 +30,15 @@ class HomeViewModel @Inject constructor(
 
     private val _books = MutableStateFlow(emptyList<Book>())
     val books = _books.asStateFlow()
-    private val _selectedBooks = MutableStateFlow(emptyList<UUID>())
-    val selectedBooks = _selectedBooks.asStateFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getAllBooks()
             updateStateHolder.checkForUpdates()
         }
         viewModelScope.launch {
             updateStateHolder.updateState.collect { state ->
-                _uiState.update { it.copy(isUpdateAvailable = state.isUpdateAvailable) }
+                _uiState.update { it.copy(isUpdateAvailable = state.updateStatus == UpdateStatus.AVAILABLE) }
             }
         }
     }
@@ -66,23 +66,6 @@ class HomeViewModel @Inject constructor(
             is HomeUiActions.DeleteBooks -> {
                 removeBooks(action.ids)
                 _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal) }
-                _selectedBooks.update { emptyList() }
-            }
-
-            is HomeUiActions.SelectBook -> {
-                // If none exit before operation, initiate select mode
-                if (_selectedBooks.value.isEmpty())
-                    _uiState.update { it.copy(topBarStatus = TopBarStatus.Select) }
-
-                if (_selectedBooks.value.any { it == action.id }) {
-                    _selectedBooks.value -= action.id
-                } else {
-                    _selectedBooks.value += action.id
-                }
-
-                // If non exist after operation, all is deleted, disable selection
-                if (_selectedBooks.value.isEmpty())
-                    _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal) }
             }
         }
     }
