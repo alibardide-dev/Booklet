@@ -3,7 +3,6 @@ package com.phoenix.booklet.screen.home.component
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -11,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import com.phoenix.booklet.R
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.screen.AlertBottomSheetTemplate
 import kotlinx.coroutines.launch
@@ -131,8 +132,8 @@ fun HomeDeleteBottomSheet(
                 }
             },
             confirmButtonColors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError,
+                contentColor = colorResource(R.color.delete_onContainer),
+                containerColor = colorResource(R.color.delete_container)
             ),
             isDismissAllowed = !isLoading
         )

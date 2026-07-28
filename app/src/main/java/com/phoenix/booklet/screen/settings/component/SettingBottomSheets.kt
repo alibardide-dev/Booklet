@@ -2,11 +2,12 @@ package com.phoenix.booklet.screen.settings.component
 
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.colorResource
+import com.phoenix.booklet.R
 import com.phoenix.booklet.data.model.BackupState
 import com.phoenix.booklet.screen.AlertBottomSheetTemplate
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ fun SettingsBackupBottomSheet(
             message =
                 when (backupState) {
                     is BackupState.Error -> "There was an error creating backup: ${backupState.error}"
-                    BackupState.Idle -> "Hmmm..."
+                    BackupState.Idle -> "Please choose a folder to save your backup to"
                     is BackupState.InProgress -> "Creating a Backup file"
                     is BackupState.Success -> "Backup created successfully"
                 },
@@ -40,7 +41,8 @@ fun SettingsBackupBottomSheet(
                 when (backupState) {
                     is BackupState.Success -> "OK"
                     is BackupState.Error -> "Exit"
-                    else -> "Hmm"
+                    BackupState.Idle -> "Choose folder"
+                    is BackupState.InProgress -> ""
                 },
             isLoading = backupState is BackupState.InProgress,
             onDismiss = {
@@ -51,10 +53,11 @@ fun SettingsBackupBottomSheet(
             },
             onConfirm = {
                 scope.launch {
-                    sheetState.hide()
+                    if (backupState != BackupState.Idle)
+                        sheetState.hide()
                     onConfirm()
                 }
-                        },
+            },
             isDismissAllowed = false
         )
     }
@@ -79,7 +82,7 @@ fun SettingsRestoreBottomSheet(
             message =
                 when (backupState) {
                     is BackupState.Error -> "There was an error restoring backup: ${backupState.error}"
-                    BackupState.Idle -> "Hmmm..."
+                    BackupState.Idle -> "Please choose a Booklet backup file to proceed"
                     is BackupState.InProgress -> "Restoring Backup from file"
                     is BackupState.Success -> "Backup restored successfully"
                 },
@@ -88,7 +91,8 @@ fun SettingsRestoreBottomSheet(
                 when (backupState) {
                     is BackupState.Success -> "Restart App"
                     is BackupState.Error -> "Exit"
-                    else -> "Hmmm"
+                    BackupState.Idle -> "Choose File"
+                    is BackupState.InProgress -> ""
                 },
             isLoading = backupState is BackupState.InProgress,
             onDismiss = {
@@ -99,10 +103,11 @@ fun SettingsRestoreBottomSheet(
             },
             onConfirm = {
                 scope.launch {
-                    sheetState.hide()
+                    if (backupState != BackupState.Idle)
+                        sheetState.hide()
                     onConfirm()
                 }
-                        },
+            },
             isDismissAllowed = false
         )
     }
@@ -143,8 +148,8 @@ fun SettingsDeleteAllBottomSheet(
             confirmButtonColors =
                 if (!isDone)
                     ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError,
+                        contentColor = colorResource(R.color.delete_onContainer),
+                        containerColor = colorResource(R.color.delete_container)
                     )
                 else
                     ButtonDefaults.buttonColors(),

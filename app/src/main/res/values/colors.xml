@@ -4,12 +4,15 @@
     <color name="wishlist_background">#c9e6ff</color>
     <color name="wishlist_text">#004b6f</color>
     <!-- Reading Colors-->
-    <color name="reading_background">#ffddb5</color>
-    <color name="reading_text">#643f00</color>
+    <color name="reading_background">#fcdfa6</color>
+    <color name="reading_text">#574419</color>
     <!-- Finished Colors-->
     <color name="finished_background">#c1efaf</color>
     <color name="finished_text">#294f20</color>
     <!-- Archive Colors-->
     <color name="archive_background">#d5dbd9</color>
     <color name="archive_text">#161d1c</color>
+<!--    Delete Color-->
+    <color name="delete_container">#ffdad5</color>
+    <color name="delete_onContainer">#73342c</color>
 </resources>

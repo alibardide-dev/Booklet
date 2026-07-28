@@ -2,7 +2,6 @@ package com.phoenix.booklet.screen.settings
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,7 +78,12 @@ fun SettingsScreen(
     if (dialogType == SettingsDialog.Backup) {
         SettingsBackupBottomSheet(
             onDismiss = { dialogType = SettingsDialog.None },
-            onConfirm = { dialogType = SettingsDialog.None },
+            onConfirm = {
+                if (backupState == BackupState.Idle)
+                    requestBackup()
+                else
+                    dialogType = SettingsDialog.None
+            },
             backupState = backupState
         )
     }
@@ -89,10 +94,12 @@ fun SettingsScreen(
                 if (backupState is BackupState.Success)
                     requestRestart()
                 else
-                dialogType = SettingsDialog.None
-                        },
+                    dialogType = SettingsDialog.None
+            },
             onConfirm = {
-                if (backupState is BackupState.Success)
+                if (backupState == BackupState.Idle)
+                    requestRestore()
+                else if (backupState is BackupState.Success)
                     requestRestart()
                 else
                     dialogType = SettingsDialog.None
@@ -110,9 +117,10 @@ fun SettingsScreen(
                     dialogType = SettingsDialog.None
             },
             onConfirm = {
-                if (isDataDeleted)
+                if (isDataDeleted) {
                     requestRestart()
-                else
+                    dialogType = SettingsDialog.None
+                } else
                     requestDeleteData()
             },
             isLoading = isLoading,
@@ -220,7 +228,7 @@ fun SettingsScreen(
                             Badge()
                     }
                 ) {
-                    Crossfade(updateStatus == UpdateStatus.AVAILABLE) { target ->
+                    Crossfade(updateStatus == UpdateStatus.CHECKING) { target ->
                         if (target) {
                             CircularProgressIndicator(Modifier.size(24.dp))
                         } else {
@@ -315,7 +323,6 @@ fun SettingsScreen(
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
                     .clickable {
-                        requestBackup()
                         dialogType = SettingsDialog.Backup
                     }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
@@ -362,7 +369,6 @@ fun SettingsScreen(
                     )
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
                     .clickable {
-                        requestRestore()
                         dialogType = SettingsDialog.Restore
                     }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
@@ -457,11 +463,7 @@ fun SettingsScreen(
                             bottomEnd = 16.dp
                         )
                     )
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.error,
-                        shape = RoundedCornerShape(16.dp)
-                    )
+                    .background(colorResource(R.color.delete_container))
                     .clickable { dialogType = SettingsDialog.DeleteAll }
                     .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -470,25 +472,27 @@ fun SettingsScreen(
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = colorResource(R.color.delete_onContainer)
                 )
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
                         text = "Delete All Data",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = colorResource(R.color.delete_onContainer)
                     )
                     Text(
                         text = "Remove EVERYTHING in Booklet",
                         fontSize = 14.sp,
+                        color = colorResource(R.color.delete_onContainer)
                     )
                 }
                 Spacer(Modifier.width(8.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onError
+                    tint = colorResource(R.color.delete_onContainer)
                 )
             }
         }

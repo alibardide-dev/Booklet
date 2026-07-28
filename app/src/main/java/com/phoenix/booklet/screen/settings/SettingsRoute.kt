@@ -44,7 +44,7 @@ fun SettingsRoute(
         requestRestart = {
             activity?.startActivity(
                 Intent(activity, MainActivity::class.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             )
         },
     )

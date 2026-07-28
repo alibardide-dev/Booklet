@@ -1,5 +1,6 @@
 package com.phoenix.booklet.data
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -11,6 +12,12 @@ import com.phoenix.booklet.utils.Constants
     entities = [Book::class],
     version = Constants.DB_VERSION,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(
+            from = 1,
+            to = 2,
+        )
+    ]
 )
 @TypeConverters(UUIDConverter::class, DateConverter::class, StatusConverter::class)
 abstract class AppDatabase(): RoomDatabase() {

@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -44,6 +45,142 @@ import com.phoenix.booklet.utils.getUriFromName
 
 @Composable
 fun BookWidget(
+    modifier: Modifier = Modifier,
+    book: Book,
+    isGrid: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    if (isGrid) {
+        BookGridWidget(
+            modifier = modifier,
+            book = book,
+            isSelected = isSelected,
+            onClick = onClick,
+            onLongClick = onLongClick
+        )
+    } else {
+        BookListWidget(
+            modifier = modifier,
+            book = book,
+            isSelected = isSelected,
+            onClick = onClick,
+            onLongClick = onLongClick
+        )
+    }
+}
+
+@Composable
+private fun BookGridWidget(
+    modifier: Modifier = Modifier,
+    book: Book,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    val context = LocalContext.current
+
+    ConstraintLayout(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .combinedClickable(
+                onClick = { onClick() },
+                onLongClick = { onLongClick() }
+            )
+            .padding(horizontal = 8.dp, vertical = 6.dp)
+    ) {
+        val (marker, picture, name) = createRefs()
+        Box(
+            Modifier
+                .constrainAs(marker) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(picture.bottom)
+                    start.linkTo(parent.start)
+                    height = Dimension.fillToConstraints
+                }
+                .width(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(
+                    when(book.status) {
+                        ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_background)
+                        ReadingStatus.READING -> colorResource(R.color.reading_background)
+                        ReadingStatus.FINISHED -> colorResource(R.color.finished_background)
+                        ReadingStatus.ARCHIVED -> colorResource(R.color.archive_background)
+                    }
+                )
+        )
+        Box(
+            modifier = Modifier
+                .constrainAs(picture) {
+                    linkTo(parent.top, parent.bottom, bias = 0f)
+                    start.linkTo(marker.end, margin = 8.dp)
+                }
+                .aspectRatio(2 / 3f)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (book.cover != null)
+                AsyncImage(
+                    model = getUriFromName(context, book.cover),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .aspectRatio(2 / 3f)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            else
+                Icon(
+                    painter = painterResource(R.drawable.ic_image),
+                    contentDescription = "Add Cover Photo",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+            AnimatedVisibility(
+                visible = isSelected,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(2 / 3f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = .6f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .padding(4.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
+        Text(
+            text = book.name,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            modifier = Modifier
+                .constrainAs(name) {
+                    top.linkTo(picture.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+            overflow = TextOverflow.Clip
+        )
+    }
+}
+
+@Composable
+private fun BookListWidget(
     modifier: Modifier = Modifier,
     book: Book,
     isSelected: Boolean,

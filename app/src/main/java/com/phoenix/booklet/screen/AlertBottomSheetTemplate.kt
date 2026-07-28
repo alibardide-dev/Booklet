@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -62,6 +63,7 @@ fun AlertBottomSheetTemplate(
                 Button(
                     onClick = { onDismiss() },
                     colors = dismissButtonColors,
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(dismissText)
                 }
@@ -70,7 +72,8 @@ fun AlertBottomSheetTemplate(
             Button(
                 onClick = { onConfirm() },
                 colors = confirmButtonColors,
-                enabled = !isLoading
+                enabled = !isLoading,
+                shape = RoundedCornerShape(8.dp)
             ) {
                 AnimatedVisibility(isLoading) {
                     CircularProgressIndicator(Modifier.size(24.dp))
