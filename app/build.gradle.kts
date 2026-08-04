@@ -13,14 +13,14 @@ room.schemaDirectory("$projectDir/schemas")
 
 android {
     namespace = "com.phoenix.booklet"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.phoenix.booklet"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 2
-        versionName = "0.0.4-beta"
+        targetSdk = 37
+        versionCode = 3
+        versionName = "0.1.5-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
