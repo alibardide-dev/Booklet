@@ -39,14 +39,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
-        }
-    }
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
     }
 }
 
@@ -67,6 +68,7 @@ dependencies {
     implementation(libs.androidx.material.icons)
     implementation(libs.androidx.media3.effect)
     implementation(libs.kotlinx.serializable)
+    implementation(libs.androidx.datastore)
     // Retrofit
     implementation(libs.retrofit2)
     implementation(libs.retrofit2.gson)

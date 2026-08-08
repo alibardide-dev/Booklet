@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="surface">#F7FBF1</color>
     <!-- Wishlist colors-->
     <color name="wishlist_background">#c9e6ff</color>
     <color name="wishlist_text">#004b6f</color>
