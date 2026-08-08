@@ -32,4 +32,10 @@ interface BookDao {
     @Query("DELETE FROM books")
     suspend fun deleteAllBooks()
 
+    @Query("UPDATE books SET isFavorite = 1 WHERE id = :id")
+    suspend fun addToFavorite(id: UUID)
+
+    @Query("UPDATE books SET isFavorite = 0 WHERE id = :id")
+    suspend fun removeFromFavorite(id: UUID)
+
 }

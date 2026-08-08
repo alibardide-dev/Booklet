@@ -7,6 +7,6 @@ object Constants {
     const val SETTING_UPDATE_VERSION = "update_version"
 
     const val DB_NAME = "booklet_db"
-    const val DB_VERSION = 2
+    const val DB_VERSION = 3
 
 }

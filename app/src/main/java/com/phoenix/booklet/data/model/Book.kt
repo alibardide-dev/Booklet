@@ -21,6 +21,8 @@ data class Book(
     val publishYear: String,
     val cover: String?,
     val status: ReadingStatus,
+    @ColumnInfo(defaultValue = "0")
+    val isFavorite: Boolean = false,
     val dateFinished: Date?,
     @ColumnInfo("created_at")
     val dateCreated: Date,

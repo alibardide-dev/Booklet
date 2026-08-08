@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -102,7 +103,7 @@ private fun BookGridWidget(
                 .width(4.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(
-                    when(book.status) {
+                    when (book.status) {
                         ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_background)
                         ReadingStatus.READING -> colorResource(R.color.reading_background)
                         ReadingStatus.FINISHED -> colorResource(R.color.finished_background)
@@ -137,6 +138,21 @@ private fun BookGridWidget(
                     contentDescription = "Add Cover Photo",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+            AnimatedVisibility(
+                visible = book.isFavorite,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_favorite_filled),
+                    contentDescription = null,
+                    tint = Color(0xFFF44336)
+                )
+            }
 
             AnimatedVisibility(
                 visible = isSelected,
@@ -215,7 +231,7 @@ private fun BookListWidget(
                 .width(4.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(
-                    when(book.status) {
+                    when (book.status) {
                         ReadingStatus.WISHLIST -> colorResource(R.color.wishlist_background)
                         ReadingStatus.READING -> colorResource(R.color.reading_background)
                         ReadingStatus.FINISHED -> colorResource(R.color.finished_background)
@@ -251,6 +267,21 @@ private fun BookListWidget(
                     contentDescription = "Add Cover Photo",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+            AnimatedVisibility(
+                visible = book.isFavorite,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_favorite_filled),
+                    contentDescription = null,
+                    tint = Color(0xFFF44336)
+                )
+            }
 
             AnimatedVisibility(
                 visible = isSelected,

@@ -67,6 +67,10 @@ class HomeViewModel @Inject constructor(
                 removeBooks(action.ids)
                 _uiState.update { it.copy(topBarStatus = TopBarStatus.Normal) }
             }
+
+            is HomeUiActions.ToggleFavorite-> {
+                toggleFavorite(action.id)
+            }
         }
     }
 
@@ -88,6 +92,25 @@ class HomeViewModel @Inject constructor(
             toDeleteBooks.forEach {
                 deleteFileFromName(context, it.cover)
             }
+        }
+    }
+
+    private fun toggleFavorite(id: UUID) {
+        viewModelScope.launch {
+            val isFavorite = _books.value.find { it.id == id }?.isFavorite
+            if (isFavorite == null) return@launch
+
+            if (isFavorite)
+                bookDao.removeFromFavorite(id)
+            else
+                bookDao.addToFavorite(id)
+
+            val tempList = books.value.toMutableList()
+            val book = tempList.find { it.id == id }!!
+            tempList.remove(book)
+            tempList.add(book.copy(isFavorite = !isFavorite))
+
+            _books.update { tempList.toList() }
         }
     }
 

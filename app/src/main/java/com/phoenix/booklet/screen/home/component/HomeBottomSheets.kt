@@ -23,7 +23,8 @@ fun HomeDetailBottomSheet(
     book: Book,
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onFavorite: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -46,6 +47,9 @@ fun HomeDetailBottomSheet(
                     sheetState.hide()
                     onDelete()
                 }
+            },
+            onClickFavorite = {
+                onFavorite()
             }
         )
     }

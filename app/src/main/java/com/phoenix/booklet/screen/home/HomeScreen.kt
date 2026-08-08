@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.TweenSpec
@@ -63,6 +64,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -91,11 +93,13 @@ fun HomeScreen(
     books: List<Book>,
     requestInsert: (Book) -> Unit,
     requestUpdate: (Book) -> Unit,
-    requestDelete: (List<UUID>) -> Unit
+    requestDelete: (List<UUID>) -> Unit,
+    toggleFavorite: (UUID) -> Unit
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedFilter by rememberSaveable { mutableStateOf(FilterStatus.ALL) }
     var isGrid by rememberSaveable { mutableStateOf(false) }
+    var favoritesOnly by rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     var dialogType: HomeDialog by remember { mutableStateOf(HomeDialog.None) }
@@ -134,6 +138,9 @@ fun HomeScreen(
                 },
                 onDelete = {
                     dialogType = HomeDialog.Delete(listOf(id))
+                },
+                onFavorite = {
+                    toggleFavorite(id)
                 }
             )
         }
@@ -323,6 +330,20 @@ fun HomeScreen(
                                 }
                             }
                         }
+                        IconButton(onClick = {
+                            favoritesOnly = !favoritesOnly
+                        }) {
+                            Icon(
+                                painter =
+                                    if(favoritesOnly)
+                                        painterResource(R.drawable.ic_favorite_filled)
+                                    else
+                                        painterResource(R.drawable.ic_favorite_outlined),
+                                contentDescription = "Favorites",
+                                tint =
+                                    animateColorAsState(if (favoritesOnly) Color(0xFFF44336) else MaterialTheme.colorScheme.onSurface).value
+                            )
+                        }
                     }
                 },
                 floatingActionButton = {
@@ -356,7 +377,7 @@ fun HomeScreen(
                     .fillMaxSize()
                     .animateContentSize()
                     .padding(innerPadding),
-                columns = if (isGrid) GridCells.Adaptive(150.dp) else GridCells.Adaptive(300.dp)
+                columns = if (isGrid) GridCells.Adaptive(150.dp) else GridCells.Adaptive(300.dp),
             ) {
                 if (books.isNotEmpty() && !isLoading) {
                     stickyHeader {
@@ -418,25 +439,33 @@ fun HomeScreen(
                         }
                     }
                     items(
-                        items = books.filter {
-                            when (selectedFilter) {
-                                FilterStatus.ALL -> true
-                                FilterStatus.WISHLIST -> it.status == ReadingStatus.WISHLIST
-                                FilterStatus.READING -> it.status == ReadingStatus.READING
-                                FilterStatus.FINISHED -> it.status == ReadingStatus.FINISHED
-                                FilterStatus.ARCHIVED -> it.status == ReadingStatus.ARCHIVED
+                        items = books
+                            .filter {
+                                if (favoritesOnly)
+                                    it.isFavorite
+                                else
+                                    true
                             }
-                        }.filter {
-                            (it.name + it.author + it.translator + it.releaseYear + it.publishYear + it.publisher)
-                                .contains(searchQuery, ignoreCase = true)
-                        },
+                            .filter {
+                                when (selectedFilter) {
+                                    FilterStatus.ALL -> true
+                                    FilterStatus.WISHLIST -> it.status == ReadingStatus.WISHLIST
+                                    FilterStatus.READING -> it.status == ReadingStatus.READING
+                                    FilterStatus.FINISHED -> it.status == ReadingStatus.FINISHED
+                                    FilterStatus.ARCHIVED -> it.status == ReadingStatus.ARCHIVED
+                                }
+                            }
+                            .filter {
+                                (it.name + it.author + it.translator + it.releaseYear + it.publishYear + it.publisher)
+                                    .contains(searchQuery, ignoreCase = true)
+                            },
                         key = { it.id }
                     ) { book ->
                         BookWidget(
                             modifier = Modifier
                                 .animateItem()
                                 .fillMaxWidth()
-                                .padding(horizontal = if (isGrid) 8.dp else 24.dp, vertical = 8.dp),
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
                             book = book,
                             isGrid = isGrid,
                             isSelected = selectedBooks.any { book.id == it },

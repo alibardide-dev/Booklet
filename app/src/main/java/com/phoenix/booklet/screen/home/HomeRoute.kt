@@ -25,5 +25,6 @@ fun HomeRoute(
         requestInsert = { homeViewModel.onAction(HomeUiActions.InsertBook(it)) },
         requestUpdate = { homeViewModel.onAction(HomeUiActions.UpdateBook(it)) },
         requestDelete = { homeViewModel.onAction(HomeUiActions.DeleteBooks(it)) },
+        toggleFavorite = { homeViewModel.onAction(HomeUiActions.ToggleFavorite(it)) }
     )
 }
