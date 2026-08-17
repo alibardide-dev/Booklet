@@ -87,8 +87,7 @@ fun deleteAllPictures(context: Context): Result {
         val files = directory.listFiles()
         files?.forEach {
             if (it.exists())
-                if (!it.delete())
-                    return Result.Error()
+                it.delete()
         }
         return Result.Success
     } catch (e: Exception) {

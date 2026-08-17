@@ -13,13 +13,11 @@ import com.phoenix.booklet.utils.Constants
     version = Constants.DB_VERSION,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(
-            from = 1,
-            to = 2,
-        )
+        AutoMigration(from = 1, to = 2,),
+        AutoMigration(from = 2, to = 3)
     ]
 )
 @TypeConverters(UUIDConverter::class, DateConverter::class, StatusConverter::class)
-abstract class AppDatabase(): RoomDatabase() {
+abstract class AppDatabase: RoomDatabase() {
     abstract fun bookDao(): BookDao
 }

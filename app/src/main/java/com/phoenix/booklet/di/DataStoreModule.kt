@@ -1,6 +1,7 @@
 package com.phoenix.booklet.di
 
 import android.content.Context
+import com.phoenix.booklet.data.DataStoreManager
 import com.phoenix.booklet.utils.UpdateStateHolder
 import dagger.Module
 import dagger.Provides
@@ -11,11 +12,16 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object UpdateModule {
+object DataStoreModule {
 
     @Provides
     @Singleton
-    fun provideUpdateStateHolder(@ApplicationContext context: Context): UpdateStateHolder =
-        UpdateStateHolder(context)
+    fun provideDataStoreManager(@ApplicationContext context: Context) = DataStoreManager(context)
+
+    @Provides
+    @Singleton
+    fun provideUpdateStateHolder(dataStoreManager: DataStoreManager): UpdateStateHolder =
+        UpdateStateHolder(dataStoreManager)
+
 
 }

@@ -21,6 +21,8 @@ fun HomeRoute(
         onSearchQueryChange = { homeViewModel.onAction(HomeUiActions.OnSearchQueryChange(it)) },
         isUpdateAvailable = uiState.isUpdateAvailable,
         isLoading = uiState.isLoading,
+        isGrid = uiState.isGrid,
+        onToggleGrid = { homeViewModel.onAction(HomeUiActions.OnToggleGrid) },
         books = books.sortedBy { it.dateUpdated }.reversed(),
         requestInsert = { homeViewModel.onAction(HomeUiActions.InsertBook(it)) },
         requestUpdate = { homeViewModel.onAction(HomeUiActions.UpdateBook(it)) },

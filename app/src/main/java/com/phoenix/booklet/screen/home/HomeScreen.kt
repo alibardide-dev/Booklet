@@ -90,6 +90,8 @@ fun HomeScreen(
     onSearchQueryChange: (String) -> Unit,
     isUpdateAvailable: Boolean,
     isLoading: Boolean,
+    isGrid: Boolean,
+    onToggleGrid: () -> Unit,
     books: List<Book>,
     requestInsert: (Book) -> Unit,
     requestUpdate: (Book) -> Unit,
@@ -98,7 +100,6 @@ fun HomeScreen(
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedFilter by rememberSaveable { mutableStateOf(FilterStatus.ALL) }
-    var isGrid by rememberSaveable { mutableStateOf(false) }
     var favoritesOnly by rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -315,14 +316,14 @@ fun HomeScreen(
                             label = "gridbutton"
                         ) { targetState ->
                             if (targetState) {
-                                IconButton(onClick = { isGrid = false }) {
+                                IconButton(onClick = { onToggleGrid() }) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_list_view),
                                         contentDescription = "List View"
                                     )
                                 }
                             } else {
-                                IconButton(onClick = { isGrid = true }) {
+                                IconButton(onClick = { onToggleGrid() }) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_grid_view),
                                         contentDescription = "Grid View"

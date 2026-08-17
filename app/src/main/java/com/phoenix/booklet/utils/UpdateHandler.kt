@@ -1,10 +1,11 @@
 package com.phoenix.booklet.utils
 
-import android.content.Context
 import com.phoenix.booklet.BuildConfig
+import com.phoenix.booklet.data.DataStoreManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -20,24 +21,20 @@ enum class UpdateStatus {
     IDLE, CHECKING, AVAILABLE, LATEST, FAILED
 }
 
-class UpdateStateHolder(val context: Context) {
+class UpdateStateHolder(val dataStoreManager: DataStoreManager) {
 
     private val _updateState = MutableStateFlow(UpdateState())
     val updateState = _updateState.asStateFlow()
 
-    private val prefs =
-        context.getSharedPreferences(Constants.PREFS_SETTING, Context.MODE_PRIVATE)
-
-    init {
-        val isUpdateAvailable =
-            prefs.getBoolean(Constants.SETTING_UPDATE_AVAILABLE, false)
-        val nextUpdateVersion =
-            prefs.getString(Constants.SETTING_UPDATE_VERSION, BuildConfig.VERSION_NAME)
-
-        setUpdateState(
-            updateStatus = if (isUpdateAvailable) UpdateStatus.AVAILABLE else UpdateStatus.LATEST,
-            nextUpdateVersion = nextUpdateVersion
-        )
+    suspend fun collectLastData() {
+        val isUpdateAvailable = dataStoreManager.isUpdateAvailable.first()
+        val nextUpdateVersion = dataStoreManager.nextUpdateVersion.first()
+        _updateState.update {
+            it.copy(
+                updateStatus = if (isUpdateAvailable) UpdateStatus.AVAILABLE else UpdateStatus.IDLE,
+                nextUpdateVersion = nextUpdateVersion
+            )
+        }
     }
 
     suspend fun checkForUpdates() {
@@ -57,7 +54,7 @@ class UpdateStateHolder(val context: Context) {
         }
     }
 
-    fun setUpdateState(
+    suspend fun setUpdateState(
         updateStatus: UpdateStatus,
         nextUpdateVersion: String?
     ) {
@@ -67,6 +64,10 @@ class UpdateStateHolder(val context: Context) {
                 nextUpdateVersion = nextUpdateVersion ?: ""
             )
         }
+        dataStoreManager.setUpdateState(
+            available = updateStatus == UpdateStatus.AVAILABLE,
+            version = nextUpdateVersion
+        )
     }
 
     fun cleanUpdateState() {
@@ -86,7 +87,7 @@ suspend fun requestLatestVersion(): UpdateResult = withContext(Dispatchers.IO) {
         if (response.code != 200)
             return@withContext UpdateResult.Error("Request Failed: ${response.code}")
 
-        val json = response.body?.string()
+        val json = response.body?.string() ?: throw NullPointerException()
         val version = JSONObject(json).getString("name")
 
         return@withContext UpdateResult.Success(

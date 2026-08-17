@@ -4,6 +4,7 @@ import java.util.UUID
 
 data class HomeUiState(
     val isLoading: Boolean = false,
+    val isGrid: Boolean = false,
     val topBarStatus: TopBarStatus = TopBarStatus.Normal,
     val searchQuery: String = "",
     val selectedFilter: FilterStatus = FilterStatus.ALL,

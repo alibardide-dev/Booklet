@@ -3,6 +3,7 @@ package com.phoenix.booklet.screen.home
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.phoenix.booklet.data.DataStoreManager
 import com.phoenix.booklet.data.dao.BookDao
 import com.phoenix.booklet.data.model.Book
 import com.phoenix.booklet.utils.UpdateStateHolder
@@ -13,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -23,6 +25,7 @@ class HomeViewModel @Inject constructor(
     @ApplicationContext val context: Context,
     val bookDao: BookDao,
     val updateStateHolder: UpdateStateHolder,
+    val dataStoreManager: DataStoreManager
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -32,6 +35,9 @@ class HomeViewModel @Inject constructor(
     val books = _books.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isGrid = dataStoreManager.isGridLayout.first()) }
+        }
         viewModelScope.launch(Dispatchers.IO) {
             getAllBooks()
             updateStateHolder.checkForUpdates()
@@ -71,6 +77,15 @@ class HomeViewModel @Inject constructor(
             is HomeUiActions.ToggleFavorite-> {
                 toggleFavorite(action.id)
             }
+
+            HomeUiActions.OnToggleGrid -> {
+                val isGrid = uiState.value.isGrid
+                _uiState.update { it.copy(isGrid = !isGrid) }
+                viewModelScope.launch {
+                    dataStoreManager.setGridLayout(!isGrid)
+                }
+            }
+
         }
     }
 

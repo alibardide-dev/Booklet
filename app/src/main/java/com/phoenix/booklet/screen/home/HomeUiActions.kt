@@ -4,6 +4,7 @@ import com.phoenix.booklet.data.model.Book
 import java.util.UUID
 
 sealed interface HomeUiActions {
+    data object OnToggleGrid: HomeUiActions
     data class OnSearchQueryChange(val query: String): HomeUiActions
     data class InsertBook(val book: Book): HomeUiActions
     data class UpdateBook(val book: Book): HomeUiActions
