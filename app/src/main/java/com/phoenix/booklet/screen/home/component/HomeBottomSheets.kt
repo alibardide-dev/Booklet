@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -66,17 +65,11 @@ fun HomeInsertBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
-        onDismissRequest = {},
-        sheetState = sheetState,
-        properties = ModalBottomSheetProperties(
-            shouldDismissOnBackPress = false,
-            shouldDismissOnClickOutside = false
-        ),
-        sheetGesturesEnabled = false,
+        onDismissRequest = { onDismiss() },
     ) {
         InsertBookBottomSheet(
             modifier = Modifier.fillMaxWidth(),
-            onClickClose = {
+            onDismiss = {
                 scope.launch {
                     sheetState.hide()
                     onDismiss()

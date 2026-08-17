@@ -1,19 +1,23 @@
 package com.phoenix.booklet.screen.home.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -139,19 +143,38 @@ private fun BookGridWidget(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-            AnimatedVisibility(
-                visible = book.isFavorite,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_favorite_filled),
-                    contentDescription = null,
-                    tint = Color(0xFFF44336)
-                )
+            if (book.score > 0 || book.isFavorite) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .animateContentSize()
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(vertical = 4.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AnimatedVisibility(visible = book.score > 0) {
+                        Text(
+                            text = "${book.score}",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = book.isFavorite,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_favorite_filled),
+                            contentDescription = null,
+                            tint = Color(0xFFF44336),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
 
             AnimatedVisibility(
@@ -268,19 +291,39 @@ private fun BookListWidget(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-            AnimatedVisibility(
-                visible = book.isFavorite,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_favorite_filled),
-                    contentDescription = null,
-                    tint = Color(0xFFF44336)
-                )
+            if (book.score > 0 || book.isFavorite) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .animateContentSize()
+                        .padding(4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(vertical = 4.dp, horizontal = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AnimatedVisibility(visible = book.score > 0) {
+                        Text(
+                            text = "${book.score}",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = book.isFavorite,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_favorite_filled),
+                            contentDescription = null,
+                            tint = Color(0xFFF44336),
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                }
             }
 
             AnimatedVisibility(

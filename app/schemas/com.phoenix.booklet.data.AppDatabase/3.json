@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "260a51dcae3f30375f6952c6f0bc1eb6",
+    "identityHash": "5eadc9122bf798ee1108f0ed9259d360",
     "entities": [
       {
         "tableName": "books",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `author` TEXT NOT NULL, `translator` TEXT NOT NULL, `description` TEXT NOT NULL, `publisher` TEXT NOT NULL, `release_year` TEXT NOT NULL, `publish_year` TEXT NOT NULL, `cover` TEXT, `status` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL DEFAULT 0, `dateFinished` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `author` TEXT NOT NULL, `translator` TEXT NOT NULL, `score` INTEGER NOT NULL DEFAULT 0, `description` TEXT NOT NULL, `publisher` TEXT NOT NULL, `release_year` TEXT NOT NULL, `publish_year` TEXT NOT NULL, `cover` TEXT, `status` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL DEFAULT 0, `dateFinished` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -31,6 +31,13 @@
             "columnName": "translator",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "description",
@@ -102,7 +109,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '260a51dcae3f30375f6952c6f0bc1eb6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5eadc9122bf798ee1108f0ed9259d360')"
     ]
   }
 }

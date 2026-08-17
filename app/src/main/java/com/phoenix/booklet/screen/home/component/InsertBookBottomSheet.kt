@@ -6,7 +6,6 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,22 +27,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -75,7 +74,7 @@ import java.util.UUID
 internal fun InsertBookBottomSheet(
     modifier: Modifier = Modifier,
     book: Book? = null,
-    onClickClose: () -> Unit,
+    onDismiss: () -> Unit,
     onClickSave: (Book) -> Unit
 ) {
     var isLoading by remember { mutableStateOf(false) }
@@ -87,6 +86,7 @@ internal fun InsertBookBottomSheet(
     var author by remember { mutableStateOf(book?.author ?: "") }
     var isTranslated by remember { mutableStateOf(book?.translator != null) }
     var translator by remember { mutableStateOf(book?.translator ?: "") }
+    var score by remember { mutableFloatStateOf(book?.score?.toFloat() ?: 0f) }
     var description by remember { mutableStateOf(book?.description ?: "") }
     var status by remember { mutableStateOf(book?.status ?: ReadingStatus.WISHLIST) }
     var date by remember { mutableStateOf(book?.dateFinished ?: Date(System.currentTimeMillis())) }
@@ -104,33 +104,200 @@ internal fun InsertBookBottomSheet(
         }
     }
 
-    /*
-    BOOK INFO
-     */
+    var step by remember { mutableIntStateOf(0) }
+
     Column(
         modifier
             .verticalScroll(rememberScrollState())
             .padding(vertical = 16.dp, horizontal = 24.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.Bottom
-        ) {
-            Text(
-                text = "Book Info",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+        AnimatedVisibility(visible = step == 0) {
+            BookInfo(
+                photoUri = photoUri,
+                onClickPhoto = {
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                        .apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            setDataAndType(
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                "image/*"
+                            )
+                            putExtra("crop", "true") // NOTE: should be string
+                            putExtra("outputX", 600) // This is needed, editor can't close without these two
+                            putExtra("outputY", 400) // This is needed
+
+                            putExtra("scale", true)
+                            putExtra("aspectX", 2)
+                            putExtra("aspectY", 3)
+                            putExtra("return-data", true)
+                        }
+                    pickImageLauncher.launch(intent)
+                },
+                onLongClickPhoto = { photoUri = null },
+                name = name,
+                onNameChange = { name = it },
+                author = author,
+                onAuthorChange = { author = it },
+                isTranslated = isTranslated,
+                toggleTranslation = { isTranslated = it },
+                translator = translator,
+                onTranslatorChange = { translator = it }
             )
-            Spacer(Modifier.width(8.dp))
-            IconButton(
-                onClick = { onClickClose() }
+        }
+        AnimatedVisibility(visible = step == 1) {
+            BookReview(
+                score = score,
+                onScoreChange = { score = it },
+                description = description,
+                onDescriptionChange = { description = it }
+            )
+        }
+        AnimatedVisibility(visible = step == 2) {
+            BookStatus(
+                status = status,
+                onStatusChange = { status = it },
+                pickDate = { isPickingDate = true },
+                date = date
+            )
+        }
+        AnimatedVisibility(visible = step == 3) {
+            BookPublishing(
+                publisher = publisher,
+                onPublisherChange = { publisher = it },
+                releaseYear = releaseYear,
+                onReleaseYearChange = { releaseYear = it },
+                publishYear = publishYear,
+                onPublishYearChange = { publishYear = it }
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        Row {
+            Button(
+                onClick = {
+                    if (step > 0) step--
+                    else onDismiss()
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
+                AnimatedVisibility(visible = step == 0) {
+                    Text("Cancel")
+                }
+                AnimatedVisibility(visible = step != 0) {
+                    Text("Back")
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (step == 3) {
+                        coroutine.launch {
+                            val uuid = book?.id ?: UUID.randomUUID()
+                            val pathUri = getUriFromName(context, book?.cover)
+                            var filePath: String? = book?.cover // Or null
+                            if (pathUri != null && pathUri != photoUri) {
+                                deleteFileFromName(context, book?.cover)
+                                filePath = null
+                            }
+                            if (photoUri != null && pathUri != photoUri) {
+                                val result = saveUriAsPhoto(
+                                    context = context,
+                                    uri = photoUri,
+                                    name = "${uuid}-${System.currentTimeMillis()}"
+                                )
+                                when (result) {
+                                    is FileResult.Error -> Unit
+                                    is FileResult.Success -> filePath = result.filePath
+                                }
+                            }
+                            val book = Book(
+                                id = uuid,
+                                name = name,
+                                author = author,
+                                translator = translator,
+                                score = score.toInt(),
+                                description = description,
+                                publisher = publisher,
+                                releaseYear = releaseYear,
+                                publishYear = publishYear,
+                                cover = filePath,
+                                status = status,
+                                isFavorite = book?.isFavorite ?: false,
+                                dateFinished = if (
+                                    status == ReadingStatus.FINISHED || status == ReadingStatus.ARCHIVED
+                                )
+                                    date
+                                else null,
+                                dateCreated = book?.dateCreated ?: Date(System.currentTimeMillis()),
+                                dateUpdated = Date(System.currentTimeMillis())
+                            )
+                            isLoading = true
+                            onClickSave(book)
+                        }
+                    } else step++
+                },
+                modifier = Modifier.weight(1f),
+                enabled = !isLoading && (step != 0 || name.isNotBlank()),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                AnimatedVisibility(visible = step < 3) {
+                    Text("Next")
+                }
+                AnimatedVisibility(visible = step == 3) {
+                    Text("Save")
+                }
+            }
+        }
+
+        if (isPickingDate) {
+            DatePickerDialog(
+                onDismissRequest = { isPickingDate = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            date = Date(datePickerState.selectedDateMillis!!)
+                            isPickingDate = false
+                        },
+                    ) {
+                        Text("Ok")
+                    }
+                }
+            ) {
+                DatePicker(
+                    state = datePickerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BookInfo(
+    photoUri: Uri?,
+    onClickPhoto: () -> Unit,
+    onLongClickPhoto: () -> Unit,
+    name: String,
+    onNameChange: (String) -> Unit,
+    author: String,
+    onAuthorChange: (String) -> Unit,
+    isTranslated: Boolean,
+    toggleTranslation: (Boolean) -> Unit,
+    translator: String,
+    onTranslatorChange: (String) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            text = "Book Info",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+        )
         Spacer(Modifier.height(8.dp))
         Row(
             Modifier.fillMaxWidth()
@@ -142,28 +309,8 @@ internal fun InsertBookBottomSheet(
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .combinedClickable(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_GET_CONTENT)
-                                .apply {
-                                    addCategory(Intent.CATEGORY_OPENABLE)
-                                    setDataAndType(
-                                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                        "image/*"
-                                    )
-                                    putExtra("crop", "true") // NOTE: should be string
-                                    putExtra("outputX", 600) // This is needed, editor can't close without these two
-                                    putExtra("outputY", 400) // This is needed
-
-                                    putExtra("scale", true)
-                                    putExtra("aspectX", 2)
-                                    putExtra("aspectY", 3)
-                                    putExtra("return-data", true)
-                                }
-                            pickImageLauncher.launch(intent)
-                        },
-                        onLongClick = {
-                            photoUri = null
-                        }
+                        onClick = { onClickPhoto() },
+                        onLongClick = { onLongClickPhoto() }
                     ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -191,7 +338,7 @@ internal fun InsertBookBottomSheet(
             ) {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { onNameChange(it) },
                     placeholder = { Text("Book Name *") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -199,7 +346,7 @@ internal fun InsertBookBottomSheet(
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = author,
-                    onValueChange = { author = it },
+                    onValueChange = { onAuthorChange(it) },
                     placeholder = { Text("Author Name") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -213,13 +360,13 @@ internal fun InsertBookBottomSheet(
         Row(Modifier.align(Alignment.CenterHorizontally)) {
             FilterChip(
                 selected = !isTranslated,
-                onClick = { isTranslated = false },
+                onClick = { toggleTranslation(false) },
                 label = { Text("Original Language") }
             )
             Spacer(Modifier.width(8.dp))
             FilterChip(
                 selected = isTranslated,
-                onClick = { isTranslated = true },
+                onClick = { toggleTranslation(true) },
                 label = { Text("Translated") }
             )
         }
@@ -227,27 +374,78 @@ internal fun InsertBookBottomSheet(
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = translator,
-                onValueChange = { translator = it },
+                onValueChange = { onTranslatorChange(it) },
                 placeholder = { Text("Translator Name") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
         }
-        Spacer(Modifier.height(16.dp))
+    }
+}
+
+private val emojis = mapOf(
+    0 to "",
+    1 to "🤢",
+    2 to "😫",
+    3 to "😖",
+    4 to "😣",
+    5 to "😕",
+    6 to "😐",
+    7 to "🙂",
+    8 to "😊",
+    9 to "😃",
+    10 to "😍"
+)
+
+@Composable
+private fun BookReview(
+    score: Float,
+    onScoreChange: (Float) -> Unit,
+    description: String,
+    onDescriptionChange: (String) -> Unit
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Book Info",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(Modifier.width(8.dp))
+            AnimatedVisibility(visible = score >= 1) {
+                Text("${emojis[score.toInt()]} $score")
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Slider(
+            value = score,
+            onValueChange = { onScoreChange(it) },
+            valueRange = 0f..10f,
+            steps = 9,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = description,
-            onValueChange = { description = it },
-            placeholder = { Text("Description") },
+            onValueChange = { onDescriptionChange(it) },
+            placeholder = { Text("Description / Review") },
             modifier = Modifier
                 .fillMaxWidth()
                 .requiredHeight(120.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
         )
-        Spacer(Modifier.height(16.dp))
-        /*
-        READING STATUS
-         */
+    }
+}
+
+@Composable
+private fun BookStatus(
+    status: ReadingStatus,
+    onStatusChange: (ReadingStatus) -> Unit,
+    pickDate: () -> Unit,
+    date: Date
+) {
+    Column(Modifier.fillMaxWidth()) {
         Text(
             text = "Status",
             fontSize = 24.sp,
@@ -259,25 +457,25 @@ internal fun InsertBookBottomSheet(
         ) {
             FilterChip(
                 selected = status == ReadingStatus.WISHLIST,
-                onClick = { status = ReadingStatus.WISHLIST },
+                onClick = { onStatusChange(ReadingStatus.WISHLIST) },
                 label = { Text("Wishlist") }
             )
             Spacer(Modifier.width(8.dp))
             FilterChip(
                 selected = status == ReadingStatus.READING,
-                onClick = { status = ReadingStatus.READING },
+                onClick = { onStatusChange(ReadingStatus.READING) },
                 label = { Text("Reading") }
             )
             Spacer(Modifier.width(8.dp))
             FilterChip(
                 selected = status == ReadingStatus.FINISHED,
-                onClick = { status = ReadingStatus.FINISHED },
+                onClick = { onStatusChange(ReadingStatus.FINISHED) },
                 label = { Text("Finished") }
             )
             Spacer(Modifier.width(8.dp))
             FilterChip(
                 selected = status == ReadingStatus.ARCHIVED,
-                onClick = { status = ReadingStatus.ARCHIVED },
+                onClick = { onStatusChange(ReadingStatus.ARCHIVED) },
                 label = { Text("Archived") }
             )
         }
@@ -290,7 +488,7 @@ internal fun InsertBookBottomSheet(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .clickable { isPickingDate = true }
+                    .clickable { pickDate() }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -306,10 +504,19 @@ internal fun InsertBookBottomSheet(
                 )
             }
         }
-        Spacer(Modifier.height(16.dp))
-        /*
-        PUBLISHING INFO
-         */
+    }
+}
+
+@Composable
+private fun BookPublishing(
+    publisher: String,
+    onPublisherChange: (String) -> Unit,
+    releaseYear: String,
+    onReleaseYearChange: (String) -> Unit,
+    publishYear: String,
+    onPublishYearChange: (String) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth()) {
         Text(
             text = "Publishing info",
             fontSize = 24.sp,
@@ -318,7 +525,7 @@ internal fun InsertBookBottomSheet(
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = publisher,
-            onValueChange = { publisher = it },
+            onValueChange = { onPublisherChange(it) },
             placeholder = { Text("Publisher Name") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -328,7 +535,7 @@ internal fun InsertBookBottomSheet(
         Row {
             OutlinedTextField(
                 value = releaseYear,
-                onValueChange = { releaseYear = it },
+                onValueChange = { onReleaseYearChange(it) },
                 placeholder = { Text("Release Year") },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
@@ -337,92 +544,12 @@ internal fun InsertBookBottomSheet(
             Spacer(Modifier.width(8.dp))
             OutlinedTextField(
                 value = publishYear,
-                onValueChange = { publishYear = it },
+                onValueChange = { onPublishYearChange(it) },
                 placeholder = { Text("Publish Year") },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
             )
-        }
-        Spacer(Modifier.height(16.dp))
-        Button(
-            onClick = {
-                coroutine.launch {
-                    val uuid = book?.id ?: UUID.randomUUID()
-                    val pathUri = getUriFromName(context, book?.cover)
-                    var filePath: String? = book?.cover // Or null
-                    if (pathUri != null && pathUri != photoUri) {
-                        deleteFileFromName(context, book?.cover)
-                        filePath = null
-                    }
-                    if (photoUri != null && pathUri != photoUri) {
-                        val result = saveUriAsPhoto(
-                            context = context,
-                            uri = photoUri,
-                            name = "${uuid}-${System.currentTimeMillis()}"
-                        )
-                        when (result) {
-                            is FileResult.Error -> Unit
-                            is FileResult.Success -> filePath = result.filePath
-                        }
-                    }
-                    val book = Book(
-                        id = uuid,
-                        name = name,
-                        author = author,
-                        translator = translator,
-                        description = description,
-                        publisher = publisher,
-                        releaseYear = releaseYear,
-                        publishYear = publishYear,
-                        cover = filePath,
-                        status = status,
-                        dateFinished = if (
-                            status == ReadingStatus.FINISHED || status == ReadingStatus.ARCHIVED
-                        )
-                            date
-                        else null,
-                        dateCreated = book?.dateCreated ?: Date(System.currentTimeMillis()),
-                        dateUpdated = Date(System.currentTimeMillis())
-                    )
-                    isLoading = true
-                    onClickSave(book)
-                }
-            },
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading && name.isNotBlank()
-        ) {
-            Crossfade(isLoading) { target ->
-                if (target) {
-                    CircularProgressIndicator()
-                } else {
-                    Text("Save Book")
-                }
-            }
-        }
-
-        if (isPickingDate) {
-            DatePickerDialog(
-                onDismissRequest = { isPickingDate = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            date = Date(datePickerState.selectedDateMillis!!)
-                            isPickingDate = false
-                        },
-                    ) {
-                        Text("Ok")
-                    }
-                }
-            ) {
-                DatePicker(
-                    state = datePickerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                )
-            }
         }
     }
 }
