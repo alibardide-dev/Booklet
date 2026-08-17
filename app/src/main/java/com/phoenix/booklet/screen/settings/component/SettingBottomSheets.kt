@@ -153,7 +153,7 @@ fun SettingsDeleteAllBottomSheet(
                     )
                 else
                     ButtonDefaults.buttonColors(),
-            isDismissAllowed = !isDone
+            isDismissAllowed = isLoading || !isDone
         )
     }
 }

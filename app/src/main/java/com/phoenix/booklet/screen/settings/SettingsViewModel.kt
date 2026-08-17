@@ -9,6 +9,7 @@ import com.phoenix.booklet.data.dao.BookDao
 import com.phoenix.booklet.data.model.BackupState
 import com.phoenix.booklet.utils.Result
 import com.phoenix.booklet.utils.UpdateStateHolder
+import com.phoenix.booklet.utils.UpdateStatus
 import com.phoenix.booklet.utils.deleteAllPictures
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,6 +32,7 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            updateStateHolder.collectLastData()
             updateStateHolder.updateState.collect { state ->
                 _uiState.update { it.copy(
                     updateStatus = state.updateStatus,
@@ -44,7 +46,14 @@ class SettingsViewModel @Inject constructor(
         when (action) {
             SettingsUiActions.CheckForUpdates -> {
                 viewModelScope.launch {
+                    _uiState.update { it.copy(updateStatus = UpdateStatus.CHECKING) }
                     updateStateHolder.checkForUpdates()
+                    updateStateHolder.updateState.collect { state ->
+                        _uiState.update { it.copy(
+                            updateStatus = state.updateStatus,
+                            nextUpdateVersion = state.nextUpdateVersion
+                        ) }
+                    }
                 }
             }
 
@@ -56,6 +65,9 @@ class SettingsViewModel @Inject constructor(
 
             SettingsUiActions.RemoveAll ->
                 removeAllData()
+
+            SettingsUiActions.ResetBackupState ->
+                _uiState.update { it.copy(backupState = BackupState.Idle) }
         }
     }
 
@@ -89,9 +101,8 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
-                val fileDeleteResult = deleteAllPictures(context)
-                if (fileDeleteResult is Result.Success)
-                    booksDao.deleteAllBooks()
+                deleteAllPictures(context)
+                booksDao.deleteAllBooks()
 
                 _uiState.update {
                     it.copy(

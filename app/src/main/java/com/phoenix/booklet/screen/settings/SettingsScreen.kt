@@ -65,6 +65,7 @@ fun SettingsScreen(
     updateStatus: UpdateStatus,
     nextUpdateVersion: String,
     backupState: BackupState,
+    resetBackupState: () -> Unit,
     isLoading: Boolean,
     isDataDeleted: Boolean,
     requestBackup: () -> Unit,
@@ -77,12 +78,17 @@ fun SettingsScreen(
 
     if (dialogType == SettingsDialog.Backup) {
         SettingsBackupBottomSheet(
-            onDismiss = { dialogType = SettingsDialog.None },
+            onDismiss = {
+                dialogType = SettingsDialog.None
+                resetBackupState()
+                        },
             onConfirm = {
                 if (backupState == BackupState.Idle)
                     requestBackup()
-                else
+                else {
                     dialogType = SettingsDialog.None
+                    resetBackupState()
+                }
             },
             backupState = backupState
         )
@@ -93,16 +99,20 @@ fun SettingsScreen(
             onDismiss = {
                 if (backupState is BackupState.Success)
                     requestRestart()
-                else
+                else {
                     dialogType = SettingsDialog.None
+                    resetBackupState()
+                }
             },
             onConfirm = {
                 if (backupState == BackupState.Idle)
                     requestRestore()
                 else if (backupState is BackupState.Success)
                     requestRestart()
-                else
+                else {
                     dialogType = SettingsDialog.None
+                    resetBackupState()
+                }
             },
             backupState = backupState
         )

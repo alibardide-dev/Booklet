@@ -36,6 +36,7 @@ fun SettingsRoute(
         nextUpdateVersion = uiState.nextUpdateVersion,
         updateStatus = uiState.updateStatus,
         backupState = uiState.backupState,
+        resetBackupState = { settingsViewModel.onAction(SettingsUiActions.ResetBackupState) },
         isLoading = uiState.isLoading,
         isDataDeleted = uiState.isDataDeleted,
         requestBackup = { createBackupLauncher.launch("booklet_backup_${System.currentTimeMillis()}.zip") },
