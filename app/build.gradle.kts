@@ -19,8 +19,8 @@ android {
         applicationId = "com.phoenix.booklet"
         minSdk = 24
         targetSdk = 37
-        versionCode = 3
-        versionName = "0.1.5-beta"
+        versionCode = 5
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
