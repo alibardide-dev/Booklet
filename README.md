@@ -3,15 +3,15 @@
 # Booklet - Manage Your Library
 Booklet is an android library manager for your books. You can easily add and manager your books, with ability to make a backup of your data anytime.
 
-You can checkout [latest release](https://github.com/alibardide-dev/News-app/releases/latest) of Booklet
+To download, you can checkout [latest release](https://github.com/alibardide-dev/Booklet/releases/latest) of Booklet
 
 # Screenshots
 <div style="width:100%; display:flex; justify-content:space-between;">
 
-[<img src="docs/screenshot_1.png" width=19% alt="Home">](docs/screenshot_1.jpg)
-[<img src="docs/screenshot_2.png" width=19% alt="Details">](docs/screenshot_1.jpg)
-[<img src="docs/screenshot_3.png" width=19% alt="Insert/Edit">](docs/screenshot_1.jpg)
-[<img src="docs/screenshot_4.png" width=19% alt="Settings">](docs/screenshot_1.jpg)
+[<img src="docs/screenshot_1.png" width="200px" alt="Home">](docs/screenshot_1.jpg)
+[<img src="docs/screenshot_2.png" width="200px" alt="Details">](docs/screenshot_2.jpg)
+[<img src="docs/screenshot_3.png" width="200px" alt="Insert/Edit">](docs/screenshot_3.jpg)
+[<img src="docs/screenshot_4.png" width="200px" alt="Settings">](docs/screenshot_4.jpg)
 
 </div>
 
