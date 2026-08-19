@@ -8,10 +8,10 @@ You can checkout [latest release](https://github.com/alibardide-dev/News-app/rel
 # Screenshots
 <div style="width:100%; display:flex; justify-content:space-between;">
 
-[<img src="docs/screenshot_1.jpg" width=19% alt="Home">](docs/screenshot_1.jpg)
-[<img src="docs/screenshot_2.jpg" width=19% alt="Home">](docs/screenshot_1.jpg)
-[<img src="docs/screenshot_3.jpg" width=19% alt="Home">](docs/screenshot_1.jpg)
-[<img src="docs/screenshot_4.jpg" width=19% alt="Home">](docs/screenshot_1.jpg)
+[<img src="docs/screenshot_1.png" width=19% alt="Home">](docs/screenshot_1.jpg)
+[<img src="docs/screenshot_2.png" width=19% alt="Details">](docs/screenshot_1.jpg)
+[<img src="docs/screenshot_3.png" width=19% alt="Insert/Edit">](docs/screenshot_1.jpg)
+[<img src="docs/screenshot_4.png" width=19% alt="Settings">](docs/screenshot_1.jpg)
 
 </div>
 
@@ -26,10 +26,12 @@ You can checkout [latest release](https://github.com/alibardide-dev/News-app/rel
 - [ ] Custom Lists
 - [ ] Cloud Backup
 - [X] Search
-- [ ] Grid View
+- [X] Grid View
 - [X] Check for Updates
-- [ ] Rating
+- [X] Rating
 - [X] Optional Fields
+- [ ] OCR
+- [ ] ISNB search
 - [ ] More Ideas
 
 # Repo Structure
